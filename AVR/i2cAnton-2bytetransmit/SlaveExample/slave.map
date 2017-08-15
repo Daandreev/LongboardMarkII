@@ -1,0 +1,481 @@
+Archive member included because of file (symbol)
+
+/usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_exit.o)
+                              /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o (exit)
+/usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_clear_bss.o)
+                              ../i2c.o (__do_clear_bss)
+
+Allocating common symbols
+Common symbol       size              file
+
+USI_TWI_state       0x1               ../i2c.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+text             0x00000000         0x00002000         xr
+data             0x00800060         0x0000ffa0         rw !x
+eeprom           0x00810000         0x00010000         rw !x
+fuse             0x00820000         0x00000400         rw !x
+lock             0x00830000         0x00000400         rw !x
+signature        0x00840000         0x00000400         rw !x
+user_signatures  0x00850000         0x00000400         rw !x
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+LOAD slave.o
+LOAD ../i2c.o
+LOAD /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/libm.a
+START GROUP
+LOAD /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a
+LOAD /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/libm.a
+LOAD /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/libc.a
+END GROUP
+
+.hash
+ *(.hash)
+
+.dynsym
+ *(.dynsym)
+
+.dynstr
+ *(.dynstr)
+
+.gnu.version
+ *(.gnu.version)
+
+.gnu.version_d
+ *(.gnu.version_d)
+
+.gnu.version_r
+ *(.gnu.version_r)
+
+.rel.init
+ *(.rel.init)
+
+.rela.init
+ *(.rela.init)
+
+.rel.text
+ *(.rel.text)
+ *(.rel.text.*)
+ *(.rel.gnu.linkonce.t*)
+
+.rela.text
+ *(.rela.text)
+ *(.rela.text.*)
+ *(.rela.gnu.linkonce.t*)
+
+.rel.fini
+ *(.rel.fini)
+
+.rela.fini
+ *(.rela.fini)
+
+.rel.rodata
+ *(.rel.rodata)
+ *(.rel.rodata.*)
+ *(.rel.gnu.linkonce.r*)
+
+.rela.rodata
+ *(.rela.rodata)
+ *(.rela.rodata.*)
+ *(.rela.gnu.linkonce.r*)
+
+.rel.data
+ *(.rel.data)
+ *(.rel.data.*)
+ *(.rel.gnu.linkonce.d*)
+
+.rela.data
+ *(.rela.data)
+ *(.rela.data.*)
+ *(.rela.gnu.linkonce.d*)
+
+.rel.ctors
+ *(.rel.ctors)
+
+.rela.ctors
+ *(.rela.ctors)
+
+.rel.dtors
+ *(.rel.dtors)
+
+.rela.dtors
+ *(.rela.dtors)
+
+.rel.got
+ *(.rel.got)
+
+.rela.got
+ *(.rela.got)
+
+.rel.bss
+ *(.rel.bss)
+
+.rela.bss
+ *(.rela.bss)
+
+.rel.plt
+ *(.rel.plt)
+
+.rela.plt
+ *(.rela.plt)
+
+.text           0x00000000      0x386
+ *(.vectors)
+ .vectors       0x00000000       0x1e /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+                0x00000000                __vectors
+                0x00000000                __vector_default
+ *(.vectors)
+ *(.progmem.gcc*)
+                0x0000001e                . = ALIGN (0x2)
+                0x0000001e                __trampolines_start = .
+ *(.trampolines)
+ .trampolines   0x0000001e        0x0 linker stubs
+ *(.trampolines*)
+                0x0000001e                __trampolines_end = .
+ *(.progmem*)
+                0x0000001e                . = ALIGN (0x2)
+ *(.jumptables)
+ *(.jumptables*)
+ *(.lowtext)
+ *(.lowtext*)
+                0x0000001e                __ctors_start = .
+ *(.ctors)
+                0x0000001e                __ctors_end = .
+                0x0000001e                __dtors_start = .
+ *(.dtors)
+                0x0000001e                __dtors_end = .
+ SORT(*)(.ctors)
+ SORT(*)(.dtors)
+ *(.init0)
+ .init0         0x0000001e        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+                0x0000001e                __init
+ *(.init0)
+ *(.init1)
+ *(.init1)
+ *(.init2)
+ .init2         0x0000001e        0xc /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+ *(.init2)
+ *(.init3)
+ *(.init3)
+ *(.init4)
+ .init4         0x0000002a       0x10 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_clear_bss.o)
+                0x0000002a                __do_clear_bss
+ *(.init4)
+ *(.init5)
+ *(.init5)
+ *(.init6)
+ *(.init6)
+ *(.init7)
+ *(.init7)
+ *(.init8)
+ *(.init8)
+ *(.init9)
+ .init9         0x0000003a        0x4 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+ *(.init9)
+ *(.text)
+ .text          0x0000003e        0x2 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+                0x0000003e                __vector_10
+                0x0000003e                __vector_12
+                0x0000003e                __bad_interrupt
+                0x0000003e                __vector_6
+                0x0000003e                __vector_3
+                0x0000003e                __vector_11
+                0x0000003e                __vector_7
+                0x0000003e                __vector_5
+                0x0000003e                __vector_4
+                0x0000003e                __vector_9
+                0x0000003e                __vector_2
+                0x0000003e                __vector_8
+                0x0000003e                __vector_1
+ .text          0x00000040       0x82 slave.o
+                0x00000040                flash
+                0x00000064                displayByte
+ .text          0x000000c2      0x2ac ../i2c.o
+                0x000000c2                i2cMInitialize
+                0x000000d8                i2cMGetStateInfo
+                0x000000de                USI_TWI_Master_Transfer
+                0x0000010a                USI_TWI_Master_Stop
+                0x00000124                i2cMTransceive
+                0x000001d0                i2cSFlushBuffers
+                0x000001e2                i2cSInitialize
+                0x00000210                i2cSTransmitByte
+                0x00000230                i2cSReceiveByte
+                0x00000252                i2cSCheckBufferNonempty
+                0x00000264                __vector_13
+                0x0000028e                __vector_14
+ .text          0x0000036e        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_exit.o)
+ .text          0x0000036e        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_clear_bss.o)
+                0x0000036e                . = ALIGN (0x2)
+ *(.text.*)
+ .text.startup  0x0000036e       0x14 slave.o
+                0x0000036e                main
+ .text.libgcc.mul
+                0x00000382        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_exit.o)
+ .text.libgcc.div
+                0x00000382        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_exit.o)
+ .text.libgcc   0x00000382        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_exit.o)
+ .text.libgcc.prologue
+                0x00000382        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_exit.o)
+ .text.libgcc.builtins
+                0x00000382        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_exit.o)
+ .text.libgcc.fmul
+                0x00000382        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_exit.o)
+ .text.libgcc.fixed
+                0x00000382        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_exit.o)
+ .text.libgcc.mul
+                0x00000382        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_clear_bss.o)
+ .text.libgcc.div
+                0x00000382        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_clear_bss.o)
+ .text.libgcc   0x00000382        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_clear_bss.o)
+ .text.libgcc.prologue
+                0x00000382        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_clear_bss.o)
+ .text.libgcc.builtins
+                0x00000382        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_clear_bss.o)
+ .text.libgcc.fmul
+                0x00000382        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_clear_bss.o)
+ .text.libgcc.fixed
+                0x00000382        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_clear_bss.o)
+                0x00000382                . = ALIGN (0x2)
+ *(.fini9)
+ .fini9         0x00000382        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_exit.o)
+                0x00000382                exit
+                0x00000382                _exit
+ *(.fini9)
+ *(.fini8)
+ *(.fini8)
+ *(.fini7)
+ *(.fini7)
+ *(.fini6)
+ *(.fini6)
+ *(.fini5)
+ *(.fini5)
+ *(.fini4)
+ *(.fini4)
+ *(.fini3)
+ *(.fini3)
+ *(.fini2)
+ *(.fini2)
+ *(.fini1)
+ *(.fini1)
+ *(.fini0)
+ .fini0         0x00000382        0x4 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_exit.o)
+ *(.fini0)
+                0x00000386                _etext = .
+
+.data           0x00800060        0x0 load address 0x00000386
+                0x00800060                PROVIDE (__data_start, .)
+ *(.data)
+ .data          0x00800060        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+ .data          0x00800060        0x0 slave.o
+ .data          0x00800060        0x0 ../i2c.o
+ .data          0x00800060        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_exit.o)
+ .data          0x00800060        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_clear_bss.o)
+ *(.data*)
+ *(.rodata)
+ *(.rodata*)
+ *(.gnu.linkonce.d*)
+                0x00800060                . = ALIGN (0x2)
+                0x00800060                _edata = .
+                0x00800060                PROVIDE (__data_end, .)
+
+.bss            0x00800060       0x27
+                0x00800060                PROVIDE (__bss_start, .)
+ *(.bss)
+ .bss           0x00800060        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+ .bss           0x00800060        0x0 slave.o
+ .bss           0x00800060       0x26 ../i2c.o
+ .bss           0x00800086        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_exit.o)
+ .bss           0x00800086        0x0 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_clear_bss.o)
+ *(.bss*)
+ *(COMMON)
+ COMMON         0x00800086        0x1 ../i2c.o
+                0x00800086                USI_TWI_state
+                0x00800087                PROVIDE (__bss_end, .)
+                0x00000386                __data_load_start = LOADADDR (.data)
+                0x00000386                __data_load_end = (__data_load_start + SIZEOF (.data))
+
+.noinit         0x00800087        0x0
+                0x00800087                PROVIDE (__noinit_start, .)
+ *(.noinit*)
+                0x00800087                PROVIDE (__noinit_end, .)
+                0x00800087                _end = .
+                0x00800087                PROVIDE (__heap_start, .)
+
+.eeprom         0x00810000        0x0
+ *(.eeprom*)
+                0x00810000                __eeprom_end = .
+
+.fuse
+ *(.fuse)
+ *(.lfuse)
+ *(.hfuse)
+ *(.efuse)
+
+.lock
+ *(.lock*)
+
+.signature
+ *(.signature*)
+
+.user_signatures
+ *(.user_signatures*)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment        0x00000000       0x11
+ *(.comment)
+ .comment       0x00000000       0x11 slave.o
+                                 0x12 (size before relaxing)
+ .comment       0x00000000       0x12 ../i2c.o
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges  0x00000000       0x88
+ *(.debug_aranges)
+ .debug_aranges
+                0x00000000       0x28 slave.o
+ .debug_aranges
+                0x00000028       0x20 ../i2c.o
+ .debug_aranges
+                0x00000048       0x20 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_exit.o)
+ .debug_aranges
+                0x00000068       0x20 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_clear_bss.o)
+
+.debug_pubnames
+ *(.debug_pubnames)
+
+.debug_info     0x00000000      0xa08
+ *(.debug_info)
+ .debug_info    0x00000000      0x2cc slave.o
+ .debug_info    0x000002cc      0x5be ../i2c.o
+ .debug_info    0x0000088a       0xbf /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_exit.o)
+ .debug_info    0x00000949       0xbf /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_clear_bss.o)
+ *(.gnu.linkonce.wi.*)
+
+.debug_abbrev   0x00000000      0x490
+ *(.debug_abbrev)
+ .debug_abbrev  0x00000000      0x1d8 slave.o
+ .debug_abbrev  0x000001d8      0x290 ../i2c.o
+ .debug_abbrev  0x00000468       0x14 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_exit.o)
+ .debug_abbrev  0x0000047c       0x14 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_clear_bss.o)
+
+.debug_line     0x00000000      0x370
+ *(.debug_line)
+ .debug_line    0x00000000      0x114 slave.o
+ .debug_line    0x00000114      0x1a6 ../i2c.o
+ .debug_line    0x000002ba       0x58 /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_exit.o)
+ .debug_line    0x00000312       0x5e /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_clear_bss.o)
+
+.debug_frame    0x00000000      0x17c
+ *(.debug_frame)
+ .debug_frame   0x00000000       0x44 slave.o
+ .debug_frame   0x00000044      0x138 ../i2c.o
+
+.debug_str      0x00000000      0x394
+ *(.debug_str)
+ .debug_str     0x00000000      0x185 slave.o
+                                0x1c9 (size before relaxing)
+ .debug_str     0x00000185      0x20f ../i2c.o
+                                0x350 (size before relaxing)
+
+.debug_loc      0x00000000      0x30e
+ *(.debug_loc)
+ .debug_loc     0x00000000       0xc7 slave.o
+ .debug_loc     0x000000c7      0x247 ../i2c.o
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_pubtypes
+ *(.debug_pubtypes)
+
+.debug_ranges   0x00000000       0x18
+ *(.debug_ranges)
+ .debug_ranges  0x00000000       0x18 slave.o
+
+.debug_macro
+ *(.debug_macro)
+OUTPUT(slave.elf elf32-avr)
+LOAD linker stubs
+
+Cross Reference Table
+
+Symbol                                            File
+USI_TWI_Master_Stop                               ../i2c.o
+USI_TWI_Master_Transfer                           ../i2c.o
+USI_TWI_state                                     ../i2c.o
+__bad_interrupt                                   /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+__bss_end                                         /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_clear_bss.o)
+__bss_start                                       /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_clear_bss.o)
+__do_clear_bss                                    /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_clear_bss.o)
+                                                  ../i2c.o
+__heap_end                                        /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+__init                                            /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+__stack                                           /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+__vector_1                                        /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+__vector_10                                       /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+__vector_11                                       /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+__vector_12                                       /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+__vector_13                                       ../i2c.o
+                                                  /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+__vector_14                                       ../i2c.o
+                                                  /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+__vector_2                                        /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+__vector_3                                        /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+__vector_4                                        /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+__vector_5                                        /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+__vector_6                                        /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+__vector_7                                        /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+__vector_8                                        /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+__vector_9                                        /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+__vector_default                                  /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+__vectors                                         /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+_exit                                             /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_exit.o)
+displayByte                                       slave.o
+exit                                              /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/avr25/libgcc.a(_exit.o)
+                                                  /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o
+flash                                             slave.o
+i2cMGetStateInfo                                  ../i2c.o
+i2cMInitialize                                    ../i2c.o
+i2cMTransceive                                    ../i2c.o
+i2cSCheckBufferNonempty                           ../i2c.o
+i2cSFlushBuffers                                  ../i2c.o
+i2cSInitialize                                    ../i2c.o
+                                                  slave.o
+i2cSReceiveByte                                   ../i2c.o
+                                                  slave.o
+i2cSTransmitByte                                  ../i2c.o
+                                                  slave.o
+main                                              slave.o
+                                                  /usr/local/CrossPack-AVR-20131216/lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn85.o

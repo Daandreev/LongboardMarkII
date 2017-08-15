@@ -1,0 +1,1477 @@
+   1               		.file	"i2c.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__tmp_reg__ = 0
+   6               	__zero_reg__ = 1
+   7               		.text
+   8               	.Ltext0:
+   9               		.cfi_sections	.debug_frame
+  10               	.global	i2cMInitialize
+  12               	i2cMInitialize:
+  13               	.LFB6:
+  14               		.file 1 "../i2c.c"
+   1:../i2c.c      **** /*****************************************************************************
+   2:../i2c.c      **** * MODIFIED FROM USI TWI SOURCES PROVIDED FROM ATMEL CORP
+   3:../i2c.c      **** *
+   4:../i2c.c      **** * File              : i2c.c
+   5:../i2c.c      **** * Compiler          : AVRGCC
+   6:../i2c.c      **** * Date              : $Date: 2016-08-08 $
+   7:../i2c.c      **** * Author        : $Author: Anton $
+   8:../i2c.c      **** *
+   9:../i2c.c      **** *
+  10:../i2c.c      **** * Supported devices : All device with USI module can be used.
+  11:../i2c.c      **** *
+  12:../i2c.c      **** *
+  13:../i2c.c      **** * Description       : This is an implementation of an TWI master or slave using
+  14:../i2c.c      **** *                     the USI module as basis. When used as master, the 
+  15:../i2c.c      **** *                     implementation assumes the AVR to be the only TWI 
+  16:../i2c.c      **** *                     master in the system and can therefore not be
+  17:../i2c.c      **** *                     used in a multi-master system.
+  18:../i2c.c      **** *
+  19:../i2c.c      **** * Usage             : Define hardware at the top of i2c.h                      
+  20:../i2c.c      ****                       To act as master, call i2cMInitialize(frequencyHz)
+  21:../i2c.c      ****                                         call i2cMTransceive to read or write data
+  22:../i2c.c      ****                                             First byte is address + r/w bit
+  23:../i2c.c      ****                                             Remaining bytes are data to write
+  24:../i2c.c      ****                                               or places to record rcv'd data
+  25:../i2c.c      ****                       To act as slave, call i2cSInitialize(ownAddress)
+  26:../i2c.c      ****                                        i2cSTransmitByte will block until byte xmitted
+  27:../i2c.c      ****                                        i2cSReceiveByte will block until byte rcv'd
+  28:../i2c.c      ****                                        i2cSCheckBufferNonempty is asynchronous check
+  29:../i2c.c      ****                                        i2cSFlushBuffers also asynchronous
+  30:../i2c.c      **** *
+  31:../i2c.c      **** ****************************************************************************/
+  32:../i2c.c      **** 
+  33:../i2c.c      **** #include "i2c.h"
+  34:../i2c.c      **** 
+  35:../i2c.c      **** //MASTER PORTION
+  36:../i2c.c      **** 
+  37:../i2c.c      **** unsigned char USI_TWI_Master_Transfer( unsigned char );
+  38:../i2c.c      **** unsigned char USI_TWI_Master_Stop( void );
+  39:../i2c.c      **** 
+  40:../i2c.c      **** union  USI_TWI_state
+  41:../i2c.c      **** {
+  42:../i2c.c      ****   unsigned char errorState;         // Can reuse the TWI_state for error states due to that it will
+  43:../i2c.c      ****   struct
+  44:../i2c.c      ****   {
+  45:../i2c.c      ****     unsigned char addressMode         : 1;
+  46:../i2c.c      ****     unsigned char masterWriteDataMode : 1;
+  47:../i2c.c      ****     unsigned char unused              : 6;
+  48:../i2c.c      ****   }; 
+  49:../i2c.c      **** }   USI_TWI_state;
+  50:../i2c.c      **** 
+  51:../i2c.c      **** 
+  52:../i2c.c      **** /*---------------------------------------------------------------
+  53:../i2c.c      ****  USI TWI single master initialization function
+  54:../i2c.c      **** ---------------------------------------------------------------*/
+  55:../i2c.c      **** void i2cMInitialize()
+  56:../i2c.c      **** {
+  15               		.loc 1 56 0
+  16               		.cfi_startproc
+  17               	/* prologue: function */
+  18               	/* frame size = 0 */
+  19               	/* stack size = 0 */
+  20               	.L__stack_usage = 0
+  57:../i2c.c      ****   PORT_USI |= (1<<PIN_USI_SDA);           // Enable pullup on SDA, to set high as released state.
+  21               		.loc 1 57 0
+  22 0000 C09A      		sbi 0x18,0
+  58:../i2c.c      ****   PORT_USI |= (1<<PIN_USI_SCL);           // Enable pullup on SCL, to set high as released state.
+  23               		.loc 1 58 0
+  24 0002 C29A      		sbi 0x18,2
+  59:../i2c.c      ****   
+  60:../i2c.c      ****   DDR_USI  |= (1<<PIN_USI_SCL);           // Enable SCL as output.
+  25               		.loc 1 60 0
+  26 0004 BA9A      		sbi 0x17,2
+  61:../i2c.c      ****   DDR_USI  |= (1<<PIN_USI_SDA);           // Enable SDA as output.
+  27               		.loc 1 61 0
+  28 0006 B89A      		sbi 0x17,0
+  62:../i2c.c      ****   
+  63:../i2c.c      ****   USIDR    =  0xFF;                       // Preload dataregister with "released level" data.
+  29               		.loc 1 63 0
+  30 0008 8FEF      		ldi r24,lo8(-1)
+  31 000a 8FB9      		out 0xf,r24
+  64:../i2c.c      ****   USICR    =  (0<<USISIE)|(0<<USIOIE)|                            // Disable Interrupts.
+  32               		.loc 1 64 0
+  33 000c 8AE2      		ldi r24,lo8(42)
+  34 000e 8DB9      		out 0xd,r24
+  65:../i2c.c      ****               (1<<USIWM1)|(0<<USIWM0)|                            // Set USI in Two-wire mode.
+  66:../i2c.c      ****               (1<<USICS1)|(0<<USICS0)|(1<<USICLK)|                // Software stobe as counter cloc
+  67:../i2c.c      ****               (0<<USITC);
+  68:../i2c.c      ****   USISR   =   (1<<USISIF)|(1<<USIOIF)|(1<<USIPF)|(1<<USIDC)|      // Clear flags,
+  35               		.loc 1 68 0
+  36 0010 80EF      		ldi r24,lo8(-16)
+  37 0012 8EB9      		out 0xe,r24
+  38 0014 0895      		ret
+  39               		.cfi_endproc
+  40               	.LFE6:
+  42               	.global	i2cMGetStateInfo
+  44               	i2cMGetStateInfo:
+  45               	.LFB7:
+  69:../i2c.c      ****               (0x0<<USICNT0);                                     // and reset counter.
+  70:../i2c.c      **** }
+  71:../i2c.c      **** 
+  72:../i2c.c      **** /*---------------------------------------------------------------
+  73:../i2c.c      **** Use this function to get hold of the error message from the last transmission
+  74:../i2c.c      **** ---------------------------------------------------------------*/
+  75:../i2c.c      **** unsigned char i2cMGetStateInfo( void )
+  76:../i2c.c      **** {
+  46               		.loc 1 76 0
+  47               		.cfi_startproc
+  48               	/* prologue: function */
+  49               	/* frame size = 0 */
+  50               	/* stack size = 0 */
+  51               	.L__stack_usage = 0
+  77:../i2c.c      ****   return ( USI_TWI_state.errorState );                            // Return error state.
+  78:../i2c.c      **** }
+  52               		.loc 1 78 0
+  53 0016 8091 0000 		lds r24,USI_TWI_state
+  54 001a 0895      		ret
+  55               		.cfi_endproc
+  56               	.LFE7:
+  58               	.global	USI_TWI_Master_Transfer
+  60               	USI_TWI_Master_Transfer:
+  61               	.LFB9:
+  79:../i2c.c      **** 
+  80:../i2c.c      **** /*---------------------------------------------------------------
+  81:../i2c.c      ****  USI Transmit and receive function. LSB of first byte in data 
+  82:../i2c.c      ****  indicates if a read or write cycles is performed. If set a read
+  83:../i2c.c      ****  operation is performed.
+  84:../i2c.c      **** 
+  85:../i2c.c      ****  Function generates (Repeated) Start Condition, sends address and
+  86:../i2c.c      ****  R/W, Reads/Writes Data, and verifies/sends ACK.
+  87:../i2c.c      ****  
+  88:../i2c.c      ****  Success or error code is returned. Error codes are defined in 
+  89:../i2c.c      ****  USI_TWI_Master.h
+  90:../i2c.c      **** ---------------------------------------------------------------*/
+  91:../i2c.c      **** unsigned char i2cMTransceive( unsigned char *msg, unsigned char msgSize)
+  92:../i2c.c      **** {
+  93:../i2c.c      ****   unsigned char tempUSISR_8bit = (1<<USISIF)|(1<<USIOIF)|(1<<USIPF)|(1<<USIDC)|      // Prepare reg
+  94:../i2c.c      ****                                  (0x0<<USICNT0);                                     // set USI to 
+  95:../i2c.c      ****   unsigned char tempUSISR_1bit = (1<<USISIF)|(1<<USIOIF)|(1<<USIPF)|(1<<USIDC)|      // Prepare reg
+  96:../i2c.c      ****                                  (0xE<<USICNT0);                                     // set USI to 
+  97:../i2c.c      **** 
+  98:../i2c.c      ****   USI_TWI_state.errorState = 0;
+  99:../i2c.c      ****   USI_TWI_state.addressMode = TRUE;
+ 100:../i2c.c      **** 
+ 101:../i2c.c      **** 
+ 102:../i2c.c      ****   if ( !(*msg & (1<<TWI_READ_BIT)) )                // The LSB in the address byte determines if is
+ 103:../i2c.c      ****   {
+ 104:../i2c.c      ****     USI_TWI_state.masterWriteDataMode = TRUE;
+ 105:../i2c.c      ****   }
+ 106:../i2c.c      **** 
+ 107:../i2c.c      ****   /* Release SCL to ensure that (repeated) Start can be performed */
+ 108:../i2c.c      ****   PORT_USI |= (1<<PIN_USI_SCL);                     // Release SCL.
+ 109:../i2c.c      ****   while( !(PIN_USI & (1<<PIN_USI_SCL)) );          // Verify that SCL becomes high.
+ 110:../i2c.c      ****   _delay_us(DELAY_TIME);
+ 111:../i2c.c      **** 
+ 112:../i2c.c      ****   /* Generate Start Condition */
+ 113:../i2c.c      ****   PORT_USI &= ~(1<<PIN_USI_SDA);                    // Force SDA LOW.
+ 114:../i2c.c      ****   _delay_us(DELAY_TIME);                         
+ 115:../i2c.c      ****   PORT_USI &= ~(1<<PIN_USI_SCL);                    // Pull SCL LOW.
+ 116:../i2c.c      ****   PORT_USI |= (1<<PIN_USI_SDA);                     // Release SDA.
+ 117:../i2c.c      **** 
+ 118:../i2c.c      **** 
+ 119:../i2c.c      ****   /*Write address and Read/Write data */
+ 120:../i2c.c      ****   do
+ 121:../i2c.c      ****   {
+ 122:../i2c.c      ****     /* If masterWrite cycle (or inital address tranmission)*/
+ 123:../i2c.c      ****     if (USI_TWI_state.addressMode || USI_TWI_state.masterWriteDataMode)
+ 124:../i2c.c      ****     {
+ 125:../i2c.c      ****       /* Write a byte */
+ 126:../i2c.c      ****       PORT_USI &= ~(1<<PIN_USI_SCL);                // Pull SCL LOW.
+ 127:../i2c.c      ****       USIDR     = *(msg++);                        // Setup data.
+ 128:../i2c.c      ****       USI_TWI_Master_Transfer( tempUSISR_8bit );    // Send 8 bits on bus.
+ 129:../i2c.c      ****       
+ 130:../i2c.c      ****       /* Clock and verify (N)ACK from slave */
+ 131:../i2c.c      ****       DDR_USI  &= ~(1<<PIN_USI_SDA);                // Enable SDA as input.
+ 132:../i2c.c      ****       if( USI_TWI_Master_Transfer( tempUSISR_1bit ) & (1<<TWI_NACK_BIT) ) 
+ 133:../i2c.c      ****       {
+ 134:../i2c.c      ****         if ( USI_TWI_state.addressMode )
+ 135:../i2c.c      ****           USI_TWI_state.errorState = USI_TWI_NO_ACK_ON_ADDRESS;
+ 136:../i2c.c      ****         else
+ 137:../i2c.c      ****           USI_TWI_state.errorState = USI_TWI_NO_ACK_ON_DATA;
+ 138:../i2c.c      ****         return (FALSE);
+ 139:../i2c.c      ****       }
+ 140:../i2c.c      ****       USI_TWI_state.addressMode = FALSE;            // Only perform address transmission once.
+ 141:../i2c.c      ****     }
+ 142:../i2c.c      ****     /* Else masterRead cycle*/
+ 143:../i2c.c      ****     else
+ 144:../i2c.c      ****     {
+ 145:../i2c.c      ****       /* Read a data byte */
+ 146:../i2c.c      ****       DDR_USI   &= ~(1<<PIN_USI_SDA);               // Enable SDA as input.
+ 147:../i2c.c      ****       *(msg++)  = USI_TWI_Master_Transfer( tempUSISR_8bit );
+ 148:../i2c.c      **** 
+ 149:../i2c.c      ****       /* Prepare to generate ACK (or NACK in case of End Of Transmission) */
+ 150:../i2c.c      ****       if( msgSize == 1)                            // If transmission of last byte was performed.
+ 151:../i2c.c      ****       {
+ 152:../i2c.c      ****         USIDR = 0xFF;                              // Load NACK to confirm End Of Transmission.
+ 153:../i2c.c      ****       }
+ 154:../i2c.c      ****       else
+ 155:../i2c.c      ****       {
+ 156:../i2c.c      ****         USIDR = 0x00;                              // Load ACK. Set data register bit 7 (output for
+ 157:../i2c.c      ****       }
+ 158:../i2c.c      ****       USI_TWI_Master_Transfer( tempUSISR_1bit );   // Generate ACK/NACK.
+ 159:../i2c.c      ****     }
+ 160:../i2c.c      ****   }while( --msgSize) ;                             // Until all data sent/received.
+ 161:../i2c.c      ****   
+ 162:../i2c.c      ****   USI_TWI_Master_Stop();                           // Send a STOP condition on the TWI bus.
+ 163:../i2c.c      **** 
+ 164:../i2c.c      **** /* Transmission successfully completed*/
+ 165:../i2c.c      ****   return (TRUE);
+ 166:../i2c.c      **** }
+ 167:../i2c.c      **** 
+ 168:../i2c.c      **** /*---------------------------------------------------------------
+ 169:../i2c.c      ****  Internal function for shifting data in and out from the USI.
+ 170:../i2c.c      ****  Data to be sent has to be placed into the USIDR prior to calling
+ 171:../i2c.c      ****  this function. Data read, will be return'ed from the function.
+ 172:../i2c.c      **** ---------------------------------------------------------------*/
+ 173:../i2c.c      **** unsigned char USI_TWI_Master_Transfer( unsigned char temp )
+ 174:../i2c.c      **** {
+  62               		.loc 1 174 0
+  63               		.cfi_startproc
+  64               	.LVL0:
+  65               	/* prologue: function */
+  66               	/* frame size = 0 */
+  67               	/* stack size = 0 */
+  68               	.L__stack_usage = 0
+ 175:../i2c.c      ****   USISR = temp;                                     // Set USISR according to temp.
+  69               		.loc 1 175 0
+  70 001c 8EB9      		out 0xe,r24
+  71               	.LVL1:
+ 176:../i2c.c      ****                                                     // Prepare clocking.
+ 177:../i2c.c      ****   temp  =  (0<<USISIE)|(0<<USIOIE)|                 // Interrupts disabled
+ 178:../i2c.c      ****            (1<<USIWM1)|(0<<USIWM0)|                 // Set USI in Two-wire mode.
+ 179:../i2c.c      ****            (1<<USICS1)|(0<<USICS0)|(1<<USICLK)|     // Software clock strobe as source.
+ 180:../i2c.c      ****            (1<<USITC);                              // Toggle Clock Port.
+ 181:../i2c.c      ****   do
+ 182:../i2c.c      ****   {
+ 183:../i2c.c      ****     _delay_us( DELAY_TIME );            
+ 184:../i2c.c      ****     USICR = temp;                          // Generate positve SCL edge.
+  72               		.loc 1 184 0
+  73 001e 8BE2      		ldi r24,lo8(43)
+  74               	.L7:
+  75               	.LVL2:
+  76               	.LBB16:
+  77               	.LBB17:
+  78               		.file 2 "/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h"
+   1:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** /* Copyright (c) 2002, Marek Michalkiewicz
+   2:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    Copyright (c) 2004,2005,2007 Joerg Wunsch
+   3:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    Copyright (c) 2007  Florin-Viorel Petrov
+   4:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    All rights reserved.
+   5:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+   6:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    Redistribution and use in source and binary forms, with or without
+   7:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    modification, are permitted provided that the following conditions are met:
+   8:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+   9:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    * Redistributions of source code must retain the above copyright
+  10:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****      notice, this list of conditions and the following disclaimer.
+  11:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+  12:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    * Redistributions in binary form must reproduce the above copyright
+  13:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****      notice, this list of conditions and the following disclaimer in
+  14:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****      the documentation and/or other materials provided with the
+  15:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****      distribution.
+  16:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+  17:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    * Neither the name of the copyright holders nor the names of
+  18:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****      contributors may be used to endorse or promote products derived
+  19:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****      from this software without specific prior written permission.
+  20:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+  21:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  22:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  23:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  24:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****   ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+  25:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  26:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  27:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  28:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  29:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  30:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  31:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****   POSSIBILITY OF SUCH DAMAGE. */
+  32:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+  33:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** /* $Id$ */
+  34:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+  35:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** #ifndef _UTIL_DELAY_H_
+  36:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** #define _UTIL_DELAY_H_ 1
+  37:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+  38:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** #ifndef __HAS_DELAY_CYCLES
+  39:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** #define __HAS_DELAY_CYCLES 1
+  40:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** #endif
+  41:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+  42:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** #include <inttypes.h>
+  43:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** #include <util/delay_basic.h>
+  44:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** #include <math.h>
+  45:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+  46:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** /** \file */
+  47:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** /** \defgroup util_delay <util/delay.h>: Convenience functions for busy-wait delay loops
+  48:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     \code
+  49:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     #define F_CPU 1000000UL  // 1 MHz
+  50:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     //#define F_CPU 14.7456E6
+  51:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     #include <util/delay.h>
+  52:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     \endcode
+  53:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+  54:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     \note As an alternative method, it is possible to pass the
+  55:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     F_CPU macro down to the compiler from the Makefile.
+  56:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     Obviously, in that case, no \c \#define statement should be
+  57:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     used.
+  58:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+  59:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     The functions in this header file are wrappers around the basic
+  60:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     busy-wait functions from <util/delay_basic.h>.  They are meant as
+  61:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     convenience functions where actual time values can be specified
+  62:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     rather than a number of cycles to wait for.  The idea behind is
+  63:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     that compile-time constant expressions will be eliminated by
+  64:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     compiler optimization so floating-point expressions can be used
+  65:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     to calculate the number of delay cycles needed based on the CPU
+  66:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     frequency passed by the macro F_CPU.
+  67:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+  68:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     \note In order for these functions to work as intended, compiler
+  69:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     optimizations <em>must</em> be enabled, and the delay time
+  70:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     <em>must</em> be an expression that is a known constant at
+  71:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     compile-time.  If these requirements are not met, the resulting
+  72:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     delay will be much longer (and basically unpredictable), and
+  73:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     applications that otherwise do not use floating-point calculations
+  74:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     will experience severe code bloat by the floating-point library
+  75:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     routines linked into the application.
+  76:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+  77:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     The functions available allow the specification of microsecond, and
+  78:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     millisecond delays directly, using the application-supplied macro
+  79:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     F_CPU as the CPU clock frequency (in Hertz).
+  80:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+  81:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** */
+  82:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+  83:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** #if !defined(__DOXYGEN__)
+  84:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** static inline void _delay_us(double __us) __attribute__((always_inline));
+  85:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** static inline void _delay_ms(double __ms) __attribute__((always_inline));
+  86:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** #endif
+  87:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+  88:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** #ifndef F_CPU
+  89:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** /* prevent compiler error by supplying a default */
+  90:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** # warning "F_CPU not defined for <util/delay.h>"
+  91:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** # define F_CPU 1000000UL
+  92:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** #endif
+  93:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+  94:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** #ifndef __OPTIMIZE__
+  95:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** # warning "Compiler optimizations disabled; functions from <util/delay.h> won't work as designed"
+  96:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** #endif
+  97:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+  98:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+  99:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****   !defined(__DELAY_BACKWARD_COMPATIBLE__) &&	   \
+ 100:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****   __STDC_HOSTED__
+ 101:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** #  include <math.h>
+ 102:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** #endif
+ 103:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 104:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** /**
+ 105:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    \ingroup util_delay
+ 106:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 107:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    Perform a delay of \c __ms milliseconds, using _delay_loop_2().
+ 108:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 109:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    The macro F_CPU is supposed to be defined to a
+ 110:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    constant defining the CPU clock frequency (in Hertz).
+ 111:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 112:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    The maximal possible delay is 262.14 ms / F_CPU in MHz.
+ 113:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 114:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    When the user request delay which exceed the maximum possible one,
+ 115:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    _delay_ms() provides a decreased resolution functionality. In this
+ 116:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    mode _delay_ms() will work with a resolution of 1/10 ms, providing
+ 117:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    delays up to 6.5535 seconds (independent from CPU frequency).  The
+ 118:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    user will not be informed about decreased resolution.
+ 119:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 120:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    If the avr-gcc toolchain has __builtin_avr_delay_cycles(unsigned long)
+ 121:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    support, maximal possible delay is 4294967.295 ms/ F_CPU in MHz. For
+ 122:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    values greater than the maximal possible delay, overflows results in
+ 123:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    no delay i.e., 0ms.
+ 124:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 125:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    Conversion of __us into clock cycles may not always result in integer.
+ 126:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    By default, the clock cycles rounded up to next integer. This ensures that
+ 127:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    the user gets atleast __us microseconds of delay.
+ 128:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 129:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    Alternatively, user can define __DELAY_ROUND_DOWN__ and __DELAY_ROUND_CLOSEST__
+ 130:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    to round down and round to closest integer.
+ 131:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 132:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    Note: The new implementation of _delay_ms(double __ms) with 
+ 133:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     __builtin_avr_delay_cycles(unsigned long) support is not backward compatible. 
+ 134:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    User can define __DELAY_BACKWARD_COMPATIBLE__ to get a backward compatible delay.
+ 135:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    Also, the backward compatible
+ 136:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    algorithm will be chosen if the code is compiled in a <em>freestanding
+ 137:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    environment</em> (GCC option \c -ffreestanding), as the math functions
+ 138:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    required for rounding are not available to the compiler then.
+ 139:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 140:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****  */
+ 141:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** void
+ 142:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** _delay_ms(double __ms)
+ 143:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** {
+ 144:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	double __tmp ; 
+ 145:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 146:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****   !defined(__DELAY_BACKWARD_COMPATIBLE__) &&	   \
+ 147:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****   __STDC_HOSTED__
+ 148:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	uint32_t __ticks_dc;
+ 149:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	extern void __builtin_avr_delay_cycles(unsigned long);
+ 150:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	__tmp = ((F_CPU) / 1e3) * __ms;
+ 151:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 152:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	#if defined(__DELAY_ROUND_DOWN__)
+ 153:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 		__ticks_dc = (uint32_t)fabs(__tmp);
+ 154:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 155:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	#elif defined(__DELAY_ROUND_CLOSEST__)
+ 156:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 		__ticks_dc = (uint32_t)(fabs(__tmp)+0.5);
+ 157:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 158:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	#else
+ 159:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 		//round up by default
+ 160:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+ 161:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	#endif
+ 162:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 163:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	__builtin_avr_delay_cycles(__ticks_dc);
+ 164:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 165:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** #else
+ 166:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	uint16_t __ticks;
+ 167:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	__tmp = ((F_CPU) / 4e3) * __ms;
+ 168:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	if (__tmp < 1.0)
+ 169:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 		__ticks = 1;
+ 170:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	else if (__tmp > 65535)
+ 171:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	{
+ 172:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 		//	__ticks = requested delay in 1/10 ms
+ 173:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 		__ticks = (uint16_t) (__ms * 10.0);
+ 174:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 		while(__ticks)
+ 175:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 		{
+ 176:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 			// wait 1/10 ms
+ 177:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 			_delay_loop_2(((F_CPU) / 4e3) / 10);
+ 178:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 			__ticks --;
+ 179:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 		}
+ 180:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 		return;
+ 181:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	}
+ 182:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	else
+ 183:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 		__ticks = (uint16_t)__tmp;
+ 184:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	_delay_loop_2(__ticks);
+ 185:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** #endif
+ 186:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** }
+ 187:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 188:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** /**
+ 189:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    \ingroup util_delay
+ 190:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 191:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    Perform a delay of \c __us microseconds, using _delay_loop_1().
+ 192:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 193:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    The macro F_CPU is supposed to be defined to a
+ 194:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    constant defining the CPU clock frequency (in Hertz).
+ 195:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 196:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    The maximal possible delay is 768 us / F_CPU in MHz.
+ 197:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 198:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    If the user requests a delay greater than the maximal possible one,
+ 199:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    _delay_us() will automatically call _delay_ms() instead.  The user
+ 200:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    will not be informed about this case.
+ 201:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 202:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    If the avr-gcc toolchain has __builtin_avr_delay_cycles(unsigned long)
+ 203:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    support, maximal possible delay is 4294967.295 us/ F_CPU in MHz. For
+ 204:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    values greater than the maximal possible delay, overflow results in
+ 205:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    no delay i.e., 0us.
+ 206:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****   
+ 207:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    Conversion of __us into clock cycles may not always result in integer.
+ 208:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    By default, the clock cycles rounded up to next integer. This ensures that
+ 209:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    the user gets atleast __us microseconds of delay.
+ 210:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 211:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    Alternatively, user can define __DELAY_ROUND_DOWN__ and __DELAY_ROUND_CLOSEST__
+ 212:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    to round down and round to closest integer.
+ 213:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****  
+ 214:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    Note: The new implementation of _delay_us(double __us) with 
+ 215:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****     __builtin_avr_delay_cycles(unsigned long) support is not backward compatible.
+ 216:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    User can define __DELAY_BACKWARD_COMPATIBLE__ to get a backward compatible delay.
+ 217:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    Also, the backward compatible
+ 218:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    algorithm will be chosen if the code is compiled in a <em>freestanding
+ 219:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    environment</em> (GCC option \c -ffreestanding), as the math functions
+ 220:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****    required for rounding are not available to the compiler then.
+ 221:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 222:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****  */
+ 223:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** void
+ 224:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** _delay_us(double __us)
+ 225:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** {
+ 226:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	double __tmp ; 
+ 227:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 228:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****   !defined(__DELAY_BACKWARD_COMPATIBLE__) &&	   \
+ 229:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h ****   __STDC_HOSTED__
+ 230:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	uint32_t __ticks_dc;
+ 231:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	extern void __builtin_avr_delay_cycles(unsigned long);
+ 232:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	__tmp = ((F_CPU) / 1e6) * __us;
+ 233:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 234:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	#if defined(__DELAY_ROUND_DOWN__)
+ 235:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 		__ticks_dc = (uint32_t)fabs(__tmp);
+ 236:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 237:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	#elif defined(__DELAY_ROUND_CLOSEST__)
+ 238:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 		__ticks_dc = (uint32_t)(fabs(__tmp)+0.5);
+ 239:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 240:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	#else
+ 241:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 		//round up by default
+ 242:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+ 243:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	#endif
+ 244:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 
+ 245:/usr/local/CrossPack-AVR-20131216/avr/include/util/delay.h **** 	__builtin_avr_delay_cycles(__ticks_dc);
+  79               		.loc 2 245 0
+  80 0020 00C0      		rjmp .
+  81 0022 00C0      		rjmp .
+  82 0024 0000      		nop
+  83               	.LBE17:
+  84               	.LBE16:
+  85               		.loc 1 184 0
+  86 0026 8DB9      		out 0xd,r24
+  87               	.L5:
+ 185:../i2c.c      ****     while( !(PIN_USI & (1<<PIN_USI_SCL)) );// Wait for SCL to go high.
+  88               		.loc 1 185 0 discriminator 1
+  89 0028 B29B      		sbis 0x16,2
+  90 002a 00C0      		rjmp .L5
+  91               	.LVL3:
+  92               	.LBB18:
+  93               	.LBB19:
+  94               		.loc 2 245 0
+  95 002c 00C0      		rjmp .
+  96 002e 00C0      		rjmp .
+  97 0030 0000      		nop
+  98               	.LBE19:
+  99               	.LBE18:
+ 186:../i2c.c      ****     _delay_us( DELAY_TIME );               
+ 187:../i2c.c      ****     USICR = temp;                          // Generate negative SCL edge.
+ 100               		.loc 1 187 0
+ 101 0032 8DB9      		out 0xd,r24
+ 188:../i2c.c      ****   }while( !(USISR & (1<<USIOIF)) );        // Check for transfer complete.
+ 102               		.loc 1 188 0
+ 103 0034 769B      		sbis 0xe,6
+ 104 0036 00C0      		rjmp .L7
+ 105               	.LVL4:
+ 106               	.LBB20:
+ 107               	.LBB21:
+ 108               		.loc 2 245 0
+ 109 0038 00C0      		rjmp .
+ 110 003a 00C0      		rjmp .
+ 111 003c 0000      		nop
+ 112               	.LBE21:
+ 113               	.LBE20:
+ 189:../i2c.c      ****   
+ 190:../i2c.c      ****   _delay_us( DELAY_TIME );           
+ 191:../i2c.c      ****   temp  = USIDR;                           // Read out data.
+ 114               		.loc 1 191 0
+ 115 003e 8FB1      		in r24,0xf
+ 116               	.LVL5:
+ 192:../i2c.c      ****   USIDR = 0xFF;                            // Release SDA.
+ 117               		.loc 1 192 0
+ 118 0040 9FEF      		ldi r25,lo8(-1)
+ 119 0042 9FB9      		out 0xf,r25
+ 193:../i2c.c      ****   DDR_USI |= (1<<PIN_USI_SDA);             // Enable SDA as output.
+ 120               		.loc 1 193 0
+ 121 0044 B89A      		sbi 0x17,0
+ 194:../i2c.c      **** 
+ 195:../i2c.c      ****   return temp;                             // Return the data from the USIDR
+ 196:../i2c.c      **** }
+ 122               		.loc 1 196 0
+ 123 0046 0895      		ret
+ 124               		.cfi_endproc
+ 125               	.LFE9:
+ 127               	.global	USI_TWI_Master_Stop
+ 129               	USI_TWI_Master_Stop:
+ 130               	.LFB10:
+ 197:../i2c.c      **** 
+ 198:../i2c.c      **** /*---------------------------------------------------------------
+ 199:../i2c.c      ****  Internal function for generating a TWI Stop Condition. 
+ 200:../i2c.c      ****  Used to release the TWI bus.
+ 201:../i2c.c      **** ---------------------------------------------------------------*/
+ 202:../i2c.c      **** unsigned char USI_TWI_Master_Stop( void )
+ 203:../i2c.c      **** {
+ 131               		.loc 1 203 0
+ 132               		.cfi_startproc
+ 133               	/* prologue: function */
+ 134               	/* frame size = 0 */
+ 135               	/* stack size = 0 */
+ 136               	.L__stack_usage = 0
+ 204:../i2c.c      ****   PORT_USI &= ~(1<<PIN_USI_SDA);           // Pull SDA low.
+ 137               		.loc 1 204 0
+ 138 0048 C098      		cbi 0x18,0
+ 205:../i2c.c      ****   PORT_USI |= (1<<PIN_USI_SCL);            // Release SCL.
+ 139               		.loc 1 205 0
+ 140 004a C29A      		sbi 0x18,2
+ 141               	.L11:
+ 206:../i2c.c      ****   while( !(PIN_USI & (1<<PIN_USI_SCL)) );  // Wait for SCL to go high.
+ 142               		.loc 1 206 0 discriminator 1
+ 143 004c B29B      		sbis 0x16,2
+ 144 004e 00C0      		rjmp .L11
+ 145               	.LVL6:
+ 146               	.LBB22:
+ 147               	.LBB23:
+ 148               		.loc 2 245 0
+ 149 0050 00C0      		rjmp .
+ 150 0052 00C0      		rjmp .
+ 151 0054 0000      		nop
+ 152               	.LBE23:
+ 153               	.LBE22:
+ 207:../i2c.c      ****   _delay_us( DELAY_TIME );             
+ 208:../i2c.c      ****   PORT_USI |= (1<<PIN_USI_SDA);            // Release SDA.
+ 154               		.loc 1 208 0
+ 155 0056 C09A      		sbi 0x18,0
+ 156               	.LVL7:
+ 157               	.LBB24:
+ 158               	.LBB25:
+ 159               		.loc 2 245 0
+ 160 0058 00C0      		rjmp .
+ 161 005a 00C0      		rjmp .
+ 162 005c 0000      		nop
+ 163               	.LBE25:
+ 164               	.LBE24:
+ 209:../i2c.c      ****   _delay_us( DELAY_TIME );                
+ 210:../i2c.c      ****   
+ 211:../i2c.c      ****   return (TRUE);
+ 212:../i2c.c      **** }
+ 165               		.loc 1 212 0
+ 166 005e 81E0      		ldi r24,lo8(1)
+ 167 0060 0895      		ret
+ 168               		.cfi_endproc
+ 169               	.LFE10:
+ 171               	.global	i2cMTransceive
+ 173               	i2cMTransceive:
+ 174               	.LFB8:
+  92:../i2c.c      **** {
+ 175               		.loc 1 92 0
+ 176               		.cfi_startproc
+ 177               	.LVL8:
+ 178 0062 0F93      		push r16
+ 179               	.LCFI0:
+ 180               		.cfi_def_cfa_offset 3
+ 181               		.cfi_offset 16, -2
+ 182 0064 1F93      		push r17
+ 183               	.LCFI1:
+ 184               		.cfi_def_cfa_offset 4
+ 185               		.cfi_offset 17, -3
+ 186 0066 CF93      		push r28
+ 187               	.LCFI2:
+ 188               		.cfi_def_cfa_offset 5
+ 189               		.cfi_offset 28, -4
+ 190 0068 DF93      		push r29
+ 191               	.LCFI3:
+ 192               		.cfi_def_cfa_offset 6
+ 193               		.cfi_offset 29, -5
+ 194               	/* prologue: function */
+ 195               	/* frame size = 0 */
+ 196               	/* stack size = 4 */
+ 197               	.L__stack_usage = 4
+ 198 006a 162F      		mov r17,r22
+ 199               	.LVL9:
+  99:../i2c.c      ****   USI_TWI_state.addressMode = TRUE;
+ 200               		.loc 1 99 0
+ 201 006c 21E0      		ldi r18,lo8(1)
+ 202 006e 2093 0000 		sts USI_TWI_state,r18
+ 102:../i2c.c      ****   if ( !(*msg & (1<<TWI_READ_BIT)) )                // The LSB in the address byte determines if is
+ 203               		.loc 1 102 0
+ 204 0072 FC01      		movw r30,r24
+ 205 0074 2081      		ld r18,Z
+ 206 0076 20FD      		sbrc r18,0
+ 207 0078 00C0      		rjmp .L13
+ 104:../i2c.c      ****     USI_TWI_state.masterWriteDataMode = TRUE;
+ 208               		.loc 1 104 0
+ 209 007a 23E0      		ldi r18,lo8(3)
+ 210 007c 2093 0000 		sts USI_TWI_state,r18
+ 211               	.L13:
+ 108:../i2c.c      ****   PORT_USI |= (1<<PIN_USI_SCL);                     // Release SCL.
+ 212               		.loc 1 108 0
+ 213 0080 C29A      		sbi 0x18,2
+ 214               	.L15:
+ 109:../i2c.c      ****   while( !(PIN_USI & (1<<PIN_USI_SCL)) );          // Verify that SCL becomes high.
+ 215               		.loc 1 109 0 discriminator 1
+ 216 0082 B29B      		sbis 0x16,2
+ 217 0084 00C0      		rjmp .L15
+ 218               	.LVL10:
+ 219               	.LBB26:
+ 220               	.LBB27:
+ 221               		.loc 2 245 0
+ 222 0086 00C0      		rjmp .
+ 223 0088 00C0      		rjmp .
+ 224 008a 0000      		nop
+ 225               	.LBE27:
+ 226               	.LBE26:
+ 113:../i2c.c      ****   PORT_USI &= ~(1<<PIN_USI_SDA);                    // Force SDA LOW.
+ 227               		.loc 1 113 0
+ 228 008c C098      		cbi 0x18,0
+ 229               	.LVL11:
+ 230               	.LBB28:
+ 231               	.LBB29:
+ 232               		.loc 2 245 0
+ 233 008e 00C0      		rjmp .
+ 234 0090 00C0      		rjmp .
+ 235 0092 0000      		nop
+ 236               	.LBE29:
+ 237               	.LBE28:
+ 115:../i2c.c      ****   PORT_USI &= ~(1<<PIN_USI_SCL);                    // Pull SCL LOW.
+ 238               		.loc 1 115 0
+ 239 0094 C298      		cbi 0x18,2
+ 116:../i2c.c      ****   PORT_USI |= (1<<PIN_USI_SDA);                     // Release SDA.
+ 240               		.loc 1 116 0
+ 241 0096 C09A      		sbi 0x18,0
+ 242 0098 EC01      		movw r28,r24
+ 152:../i2c.c      ****         USIDR = 0xFF;                              // Load NACK to confirm End Of Transmission.
+ 243               		.loc 1 152 0
+ 244 009a 0FEF      		ldi r16,lo8(-1)
+ 245               	.LVL12:
+ 246               	.L24:
+ 123:../i2c.c      ****     if (USI_TWI_state.addressMode || USI_TWI_state.masterWriteDataMode)
+ 247               		.loc 1 123 0
+ 248 009c 8091 0000 		lds r24,USI_TWI_state
+ 249 00a0 8370      		andi r24,lo8(3)
+ 250 00a2 01F0      		breq .L16
+ 126:../i2c.c      ****       PORT_USI &= ~(1<<PIN_USI_SCL);                // Pull SCL LOW.
+ 251               		.loc 1 126 0
+ 252 00a4 C298      		cbi 0x18,2
+ 253               	.LVL13:
+ 127:../i2c.c      ****       USIDR     = *(msg++);                        // Setup data.
+ 254               		.loc 1 127 0
+ 255 00a6 8881      		ld r24,Y
+ 256 00a8 8FB9      		out 0xf,r24
+ 128:../i2c.c      ****       USI_TWI_Master_Transfer( tempUSISR_8bit );    // Send 8 bits on bus.
+ 257               		.loc 1 128 0
+ 258 00aa 80EF      		ldi r24,lo8(-16)
+ 259 00ac 00D0      		rcall USI_TWI_Master_Transfer
+ 260               	.LVL14:
+ 131:../i2c.c      ****       DDR_USI  &= ~(1<<PIN_USI_SDA);                // Enable SDA as input.
+ 261               		.loc 1 131 0
+ 262 00ae B898      		cbi 0x17,0
+ 132:../i2c.c      ****       if( USI_TWI_Master_Transfer( tempUSISR_1bit ) & (1<<TWI_NACK_BIT) ) 
+ 263               		.loc 1 132 0
+ 264 00b0 8EEF      		ldi r24,lo8(-2)
+ 265 00b2 00D0      		rcall USI_TWI_Master_Transfer
+ 266               	.LVL15:
+ 267 00b4 80FF      		sbrs r24,0
+ 268 00b6 00C0      		rjmp .L17
+ 134:../i2c.c      ****         if ( USI_TWI_state.addressMode )
+ 269               		.loc 1 134 0
+ 270 00b8 9091 0000 		lds r25,USI_TWI_state
+ 271 00bc 892F      		mov r24,r25
+ 272 00be 8170      		andi r24,lo8(1)
+ 273 00c0 90FF      		sbrs r25,0
+ 274 00c2 00C0      		rjmp .L18
+ 135:../i2c.c      ****           USI_TWI_state.errorState = USI_TWI_NO_ACK_ON_ADDRESS;
+ 275               		.loc 1 135 0
+ 276 00c4 86E0      		ldi r24,lo8(6)
+ 277 00c6 8093 0000 		sts USI_TWI_state,r24
+ 138:../i2c.c      ****         return (FALSE);
+ 278               		.loc 1 138 0
+ 279 00ca 80E0      		ldi r24,0
+ 280 00cc 00C0      		rjmp .L19
+ 281               	.L18:
+ 137:../i2c.c      ****           USI_TWI_state.errorState = USI_TWI_NO_ACK_ON_DATA;
+ 282               		.loc 1 137 0
+ 283 00ce 95E0      		ldi r25,lo8(5)
+ 284 00d0 9093 0000 		sts USI_TWI_state,r25
+ 285 00d4 00C0      		rjmp .L19
+ 286               	.L17:
+ 140:../i2c.c      ****       USI_TWI_state.addressMode = FALSE;            // Only perform address transmission once.
+ 287               		.loc 1 140 0
+ 288 00d6 8091 0000 		lds r24,USI_TWI_state
+ 289 00da 8E7F      		andi r24,lo8(~(1<<0))
+ 290 00dc 8093 0000 		sts USI_TWI_state,r24
+ 291 00e0 00C0      		rjmp .L20
+ 292               	.LVL16:
+ 293               	.L16:
+ 146:../i2c.c      ****       DDR_USI   &= ~(1<<PIN_USI_SDA);               // Enable SDA as input.
+ 294               		.loc 1 146 0
+ 295 00e2 B898      		cbi 0x17,0
+ 296               	.LVL17:
+ 147:../i2c.c      ****       *(msg++)  = USI_TWI_Master_Transfer( tempUSISR_8bit );
+ 297               		.loc 1 147 0
+ 298 00e4 80EF      		ldi r24,lo8(-16)
+ 299 00e6 00D0      		rcall USI_TWI_Master_Transfer
+ 300               	.LVL18:
+ 301 00e8 8883      		st Y,r24
+ 150:../i2c.c      ****       if( msgSize == 1)                            // If transmission of last byte was performed.
+ 302               		.loc 1 150 0
+ 303 00ea 1130      		cpi r17,lo8(1)
+ 304 00ec 01F4      		brne .L21
+ 152:../i2c.c      ****         USIDR = 0xFF;                              // Load NACK to confirm End Of Transmission.
+ 305               		.loc 1 152 0
+ 306 00ee 0FB9      		out 0xf,r16
+ 307 00f0 00C0      		rjmp .L22
+ 308               	.L21:
+ 156:../i2c.c      ****         USIDR = 0x00;                              // Load ACK. Set data register bit 7 (output for
+ 309               		.loc 1 156 0
+ 310 00f2 1FB8      		out 0xf,__zero_reg__
+ 311               	.L22:
+ 158:../i2c.c      ****       USI_TWI_Master_Transfer( tempUSISR_1bit );   // Generate ACK/NACK.
+ 312               		.loc 1 158 0
+ 313 00f4 8EEF      		ldi r24,lo8(-2)
+ 314 00f6 00D0      		rcall USI_TWI_Master_Transfer
+ 315               	.LVL19:
+ 316               	.L20:
+ 160:../i2c.c      ****   }while( --msgSize) ;                             // Until all data sent/received.
+ 317               		.loc 1 160 0
+ 318 00f8 1150      		subi r17,lo8(-(-1))
+ 319               	.LVL20:
+ 320 00fa 2196      		adiw r28,1
+ 321 00fc 1111      		cpse r17,__zero_reg__
+ 322 00fe 00C0      		rjmp .L24
+ 162:../i2c.c      ****   USI_TWI_Master_Stop();                           // Send a STOP condition on the TWI bus.
+ 323               		.loc 1 162 0
+ 324 0100 00D0      		rcall USI_TWI_Master_Stop
+ 325               	.LVL21:
+ 165:../i2c.c      ****   return (TRUE);
+ 326               		.loc 1 165 0
+ 327 0102 81E0      		ldi r24,lo8(1)
+ 328               	.L19:
+ 329               	/* epilogue start */
+ 166:../i2c.c      **** }
+ 330               		.loc 1 166 0
+ 331 0104 DF91      		pop r29
+ 332 0106 CF91      		pop r28
+ 333 0108 1F91      		pop r17
+ 334               	.LVL22:
+ 335 010a 0F91      		pop r16
+ 336 010c 0895      		ret
+ 337               		.cfi_endproc
+ 338               	.LFE8:
+ 340               	.global	i2cSFlushBuffers
+ 342               	i2cSFlushBuffers:
+ 343               	.LFB11:
+ 213:../i2c.c      **** 
+ 214:../i2c.c      **** 
+ 215:../i2c.c      **** 
+ 216:../i2c.c      **** 
+ 217:../i2c.c      **** 
+ 218:../i2c.c      **** 
+ 219:../i2c.c      **** 
+ 220:../i2c.c      **** //SLAVE PORTION
+ 221:../i2c.c      **** 
+ 222:../i2c.c      **** /*! Static Variables
+ 223:../i2c.c      ****  */
+ 224:../i2c.c      **** 
+ 225:../i2c.c      **** static unsigned char TWI_slaveAddress;
+ 226:../i2c.c      **** static volatile unsigned char USI_TWI_Overflow_State;
+ 227:../i2c.c      **** 
+ 228:../i2c.c      **** 
+ 229:../i2c.c      **** /*! Local variables
+ 230:../i2c.c      ****  */
+ 231:../i2c.c      **** static uint8_t TWI_RxBuf[TWI_RX_BUFFER_SIZE];
+ 232:../i2c.c      **** static volatile uint8_t TWI_RxHead;
+ 233:../i2c.c      **** static volatile uint8_t TWI_RxTail;
+ 234:../i2c.c      **** 
+ 235:../i2c.c      **** static uint8_t TWI_TxBuf[TWI_TX_BUFFER_SIZE];
+ 236:../i2c.c      **** static volatile uint8_t TWI_TxHead;
+ 237:../i2c.c      **** static volatile uint8_t TWI_TxTail;
+ 238:../i2c.c      **** 
+ 239:../i2c.c      **** /*! \brief Flushes the TWI buffers
+ 240:../i2c.c      ****  */
+ 241:../i2c.c      **** void i2cSFlushBuffers(void)
+ 242:../i2c.c      **** {
+ 344               		.loc 1 242 0
+ 345               		.cfi_startproc
+ 346               	/* prologue: function */
+ 347               	/* frame size = 0 */
+ 348               	/* stack size = 0 */
+ 349               	.L__stack_usage = 0
+ 243:../i2c.c      ****     TWI_RxTail = 0;
+ 350               		.loc 1 243 0
+ 351 010e 1092 0000 		sts TWI_RxTail,__zero_reg__
+ 244:../i2c.c      ****     TWI_RxHead = 0;
+ 352               		.loc 1 244 0
+ 353 0112 1092 0000 		sts TWI_RxHead,__zero_reg__
+ 245:../i2c.c      ****     TWI_TxTail = 0;
+ 354               		.loc 1 245 0
+ 355 0116 1092 0000 		sts TWI_TxTail,__zero_reg__
+ 246:../i2c.c      ****     TWI_TxHead = 0;
+ 356               		.loc 1 246 0
+ 357 011a 1092 0000 		sts TWI_TxHead,__zero_reg__
+ 358 011e 0895      		ret
+ 359               		.cfi_endproc
+ 360               	.LFE11:
+ 362               	.global	i2cSInitialize
+ 364               	i2cSInitialize:
+ 365               	.LFB12:
+ 247:../i2c.c      **** }
+ 248:../i2c.c      **** 
+ 249:../i2c.c      **** //********** USI_TWI functions **********//
+ 250:../i2c.c      **** 
+ 251:../i2c.c      **** /*
+ 252:../i2c.c      ****  * Initialise USI for TWI Slave mode.
+ 253:../i2c.c      ****  */
+ 254:../i2c.c      **** void i2cSInitialize( unsigned char TWI_ownAddress )
+ 255:../i2c.c      **** {
+ 366               		.loc 1 255 0
+ 367               		.cfi_startproc
+ 368               	.LVL23:
+ 369 0120 CF93      		push r28
+ 370               	.LCFI4:
+ 371               		.cfi_def_cfa_offset 3
+ 372               		.cfi_offset 28, -2
+ 373 0122 DF93      		push r29
+ 374               	.LCFI5:
+ 375               		.cfi_def_cfa_offset 4
+ 376               		.cfi_offset 29, -3
+ 377 0124 1F92      		push __zero_reg__
+ 378               	.LCFI6:
+ 379               		.cfi_def_cfa_offset 5
+ 380 0126 CDB7      		in r28,__SP_L__
+ 381 0128 DEB7      		in r29,__SP_H__
+ 382               	.LCFI7:
+ 383               		.cfi_def_cfa_register 28
+ 384               	/* prologue: function */
+ 385               	/* frame size = 1 */
+ 386               	/* stack size = 3 */
+ 387               	.L__stack_usage = 3
+ 256:../i2c.c      ****   sei();
+ 388               		.loc 1 256 0
+ 389               	/* #APP */
+ 390               	 ;  256 "../i2c.c" 1
+ 391 012a 7894      		sei
+ 392               	 ;  0 "" 2
+ 257:../i2c.c      **** 
+ 258:../i2c.c      ****   i2cSFlushBuffers();
+ 393               		.loc 1 258 0
+ 394               	/* #NOAPP */
+ 395 012c 8983      		std Y+1,r24
+ 396 012e 00D0      		rcall i2cSFlushBuffers
+ 397               	.LVL24:
+ 259:../i2c.c      **** 
+ 260:../i2c.c      ****   TWI_slaveAddress = TWI_ownAddress;
+ 398               		.loc 1 260 0
+ 399 0130 8981      		ldd r24,Y+1
+ 400 0132 8093 0000 		sts TWI_slaveAddress,r24
+ 261:../i2c.c      **** 
+ 262:../i2c.c      ****   PORT_USI |=  (1<<PORT_USI_SCL);                                 // Set SCL high
+ 401               		.loc 1 262 0
+ 402 0136 C29A      		sbi 0x18,2
+ 263:../i2c.c      ****   PORT_USI |=  (1<<PORT_USI_SDA);                                 // Set SDA high
+ 403               		.loc 1 263 0
+ 404 0138 C09A      		sbi 0x18,0
+ 264:../i2c.c      ****   DDR_USI  |=  (1<<PORT_USI_SCL);                                 // Set SCL as output
+ 405               		.loc 1 264 0
+ 406 013a BA9A      		sbi 0x17,2
+ 265:../i2c.c      ****   DDR_USI  &= ~(1<<PORT_USI_SDA);                                 // Set SDA as input
+ 407               		.loc 1 265 0
+ 408 013c B898      		cbi 0x17,0
+ 266:../i2c.c      ****   USICR    =  (1<<USISIE)|(0<<USIOIE)|                            // Enable Start Condition Interru
+ 409               		.loc 1 266 0
+ 410 013e 88EA      		ldi r24,lo8(-88)
+ 411 0140 8DB9      		out 0xd,r24
+ 267:../i2c.c      ****               (1<<USIWM1)|(0<<USIWM0)|                            // Set USI in Two-wire mode. No U
+ 268:../i2c.c      ****                                                                   // to first Start Condition (pote
+ 269:../i2c.c      ****               (1<<USICS1)|(0<<USICS0)|(0<<USICLK)|                // Shift Register Clock Source = 
+ 270:../i2c.c      ****               (0<<USITC);
+ 271:../i2c.c      ****   USISR    = 0xF0;                                                // Clear all flags and reset over
+ 412               		.loc 1 271 0
+ 413 0142 80EF      		ldi r24,lo8(-16)
+ 414 0144 8EB9      		out 0xe,r24
+ 415               	/* epilogue start */
+ 272:../i2c.c      **** }
+ 416               		.loc 1 272 0
+ 417 0146 0F90      		pop __tmp_reg__
+ 418 0148 DF91      		pop r29
+ 419 014a CF91      		pop r28
+ 420 014c 0895      		ret
+ 421               		.cfi_endproc
+ 422               	.LFE12:
+ 424               	.global	i2cSTransmitByte
+ 426               	i2cSTransmitByte:
+ 427               	.LFB13:
+ 273:../i2c.c      **** 
+ 274:../i2c.c      **** 
+ 275:../i2c.c      **** /*  Puts data in the transmission buffer, Waits if buffer is full.
+ 276:../i2c.c      **** */
+ 277:../i2c.c      **** void i2cSTransmitByte( unsigned char data )
+ 278:../i2c.c      **** {
+ 428               		.loc 1 278 0
+ 429               		.cfi_startproc
+ 430               	.LVL25:
+ 431               	/* prologue: function */
+ 432               	/* frame size = 0 */
+ 433               	/* stack size = 0 */
+ 434               	.L__stack_usage = 0
+ 279:../i2c.c      ****     unsigned char tmphead;
+ 280:../i2c.c      **** 
+ 281:../i2c.c      ****     tmphead = ( TWI_TxHead + 1 ) & TWI_TX_BUFFER_MASK;         // Calculate buffer index.
+ 435               		.loc 1 281 0
+ 436 014e 9091 0000 		lds r25,TWI_TxHead
+ 437 0152 9F5F      		subi r25,lo8(-(1))
+ 438 0154 9F70      		andi r25,lo8(15)
+ 439               	.LVL26:
+ 440               	.L29:
+ 282:../i2c.c      ****     while ( tmphead == TWI_TxTail );                           // Wait for free space in buffer.
+ 441               		.loc 1 282 0 discriminator 1
+ 442 0156 2091 0000 		lds r18,TWI_TxTail
+ 443 015a 9217      		cp r25,r18
+ 444 015c 01F0      		breq .L29
+ 283:../i2c.c      ****     TWI_TxBuf[tmphead] = data;                                 // Store data in buffer.
+ 445               		.loc 1 283 0
+ 446 015e E92F      		mov r30,r25
+ 447 0160 F0E0      		ldi r31,0
+ 448 0162 E050      		subi r30,lo8(-(TWI_TxBuf))
+ 449 0164 F040      		sbci r31,hi8(-(TWI_TxBuf))
+ 450 0166 8083      		st Z,r24
+ 284:../i2c.c      ****     TWI_TxHead = tmphead;                                      // Store new index.
+ 451               		.loc 1 284 0
+ 452 0168 9093 0000 		sts TWI_TxHead,r25
+ 453 016c 0895      		ret
+ 454               		.cfi_endproc
+ 455               	.LFE13:
+ 457               	.global	i2cSReceiveByte
+ 459               	i2cSReceiveByte:
+ 460               	.LFB14:
+ 285:../i2c.c      **** }
+ 286:../i2c.c      **** 
+ 287:../i2c.c      **** /*  Returns a byte from the receive buffer. Waits if buffer is empty.
+ 288:../i2c.c      ****  */
+ 289:../i2c.c      **** unsigned char i2cSReceiveByte( void )
+ 290:../i2c.c      **** {
+ 461               		.loc 1 290 0
+ 462               		.cfi_startproc
+ 463               	/* prologue: function */
+ 464               	/* frame size = 0 */
+ 465               	/* stack size = 0 */
+ 466               	.L__stack_usage = 0
+ 291:../i2c.c      ****     unsigned char tmptail;
+ 292:../i2c.c      ****     unsigned char tmpRxTail;                                  // Temporary variable to store volati
+ 293:../i2c.c      ****     tmpRxTail = TWI_RxTail;                                   // Not necessary, but prevents warnin
+ 467               		.loc 1 293 0
+ 468 016e 8091 0000 		lds r24,TWI_RxTail
+ 469               	.LVL27:
+ 470               	.L32:
+ 294:../i2c.c      ****     while ( TWI_RxHead == tmpRxTail );
+ 471               		.loc 1 294 0 discriminator 1
+ 472 0172 9091 0000 		lds r25,TWI_RxHead
+ 473 0176 9817      		cp r25,r24
+ 474 0178 01F0      		breq .L32
+ 295:../i2c.c      ****     tmptail = ( TWI_RxTail + 1 ) & TWI_RX_BUFFER_MASK;        // Calculate buffer index
+ 475               		.loc 1 295 0
+ 476 017a E091 0000 		lds r30,TWI_RxTail
+ 477 017e EF5F      		subi r30,lo8(-(1))
+ 478 0180 EF70      		andi r30,lo8(15)
+ 479               	.LVL28:
+ 296:../i2c.c      ****     TWI_RxTail = tmptail;                                     // Store new index
+ 480               		.loc 1 296 0
+ 481 0182 E093 0000 		sts TWI_RxTail,r30
+ 297:../i2c.c      ****     return TWI_RxBuf[tmptail];                                // Return data from the buffer.
+ 482               		.loc 1 297 0
+ 483 0186 F0E0      		ldi r31,0
+ 484 0188 E050      		subi r30,lo8(-(TWI_RxBuf))
+ 485 018a F040      		sbci r31,hi8(-(TWI_RxBuf))
+ 486               	.LVL29:
+ 298:../i2c.c      **** }
+ 487               		.loc 1 298 0
+ 488 018c 8081      		ld r24,Z
+ 489               	.LVL30:
+ 490 018e 0895      		ret
+ 491               		.cfi_endproc
+ 492               	.LFE14:
+ 494               	.global	i2cSCheckBufferNonempty
+ 496               	i2cSCheckBufferNonempty:
+ 497               	.LFB15:
+ 299:../i2c.c      **** 
+ 300:../i2c.c      **** /*  Check if there is data in the receive buffer.
+ 301:../i2c.c      ****  */
+ 302:../i2c.c      **** unsigned char i2cSCheckBufferNonempty( void )
+ 303:../i2c.c      **** {
+ 498               		.loc 1 303 0
+ 499               		.cfi_startproc
+ 500               	/* prologue: function */
+ 501               	/* frame size = 0 */
+ 502               	/* stack size = 0 */
+ 503               	.L__stack_usage = 0
+ 304:../i2c.c      ****     unsigned char tmpRxTail;                            // Temporary variable to store volatile
+ 305:../i2c.c      ****     tmpRxTail = TWI_RxTail;                             // Not necessary, but prevents warnings
+ 504               		.loc 1 305 0
+ 505 0190 9091 0000 		lds r25,TWI_RxTail
+ 506               	.LVL31:
+ 306:../i2c.c      ****     return ( TWI_RxHead != tmpRxTail );                 // Return 0 (FALSE) if the receive buffer i
+ 507               		.loc 1 306 0
+ 508 0194 2091 0000 		lds r18,TWI_RxHead
+ 509 0198 81E0      		ldi r24,lo8(1)
+ 510 019a 2913      		cpse r18,r25
+ 511 019c 00C0      		rjmp .L34
+ 512 019e 80E0      		ldi r24,0
+ 513               	.L34:
+ 307:../i2c.c      **** }
+ 514               		.loc 1 307 0
+ 515 01a0 0895      		ret
+ 516               		.cfi_endproc
+ 517               	.LFE15:
+ 519               	.global	__vector_13
+ 521               	__vector_13:
+ 522               	.LFB16:
+ 308:../i2c.c      **** 
+ 309:../i2c.c      **** 
+ 310:../i2c.c      **** //Internal functions
+ 311:../i2c.c      **** 
+ 312:../i2c.c      **** /* Usi start condition ISR
+ 313:../i2c.c      ****  * Detects the USI_TWI Start Condition and intialises the USI
+ 314:../i2c.c      ****  * for reception of the "TWI Address" packet.
+ 315:../i2c.c      ****  */
+ 316:../i2c.c      **** 
+ 317:../i2c.c      **** ISR(USI_START_VECTOR)
+ 318:../i2c.c      **** {
+ 523               		.loc 1 318 0
+ 524               		.cfi_startproc
+ 525 01a2 1F92      		push r1
+ 526               	.LCFI8:
+ 527               		.cfi_def_cfa_offset 3
+ 528               		.cfi_offset 1, -2
+ 529 01a4 0F92      		push r0
+ 530               	.LCFI9:
+ 531               		.cfi_def_cfa_offset 4
+ 532               		.cfi_offset 0, -3
+ 533 01a6 0FB6      		in r0,__SREG__
+ 534 01a8 0F92      		push r0
+ 535 01aa 1124      		clr __zero_reg__
+ 536 01ac 8F93      		push r24
+ 537               	.LCFI10:
+ 538               		.cfi_def_cfa_offset 5
+ 539               		.cfi_offset 24, -4
+ 540               	/* prologue: Signal */
+ 541               	/* frame size = 0 */
+ 542               	/* stack size = 4 */
+ 543               	.L__stack_usage = 4
+ 319:../i2c.c      ****     unsigned char tmpUSISR;                                         // Temporary variable to store 
+ 320:../i2c.c      ****     tmpUSISR = USISR;                                               // Not necessary, but prevents 
+ 544               		.loc 1 320 0
+ 545 01ae 8EB1      		in r24,0xe
+ 321:../i2c.c      ****     // Set default starting conditions for new TWI package
+ 322:../i2c.c      ****     USI_TWI_Overflow_State = USI_SLAVE_CHECK_ADDRESS;
+ 546               		.loc 1 322 0
+ 547 01b0 1092 0000 		sts USI_TWI_Overflow_State,__zero_reg__
+ 323:../i2c.c      ****     DDR_USI  &= ~(1<<PORT_USI_SDA);                                 // Set SDA as input
+ 548               		.loc 1 323 0
+ 549 01b4 B898      		cbi 0x17,0
+ 324:../i2c.c      ****     while ( (PIN_USI & (1<<PORT_USI_SCL)) & !(tmpUSISR & (1<<USIPF)) );   // Wait for SCL to go low
+ 550               		.loc 1 324 0
+ 551 01b6 86B3      		in r24,0x16
+ 325:../i2c.c      ****                                                                           // If a Stop condition ar
+ 326:../i2c.c      **** 
+ 327:../i2c.c      ****     USICR   =   (1<<USISIE)|(1<<USIOIE)|                            // Enable Overflow and Start Co
+ 552               		.loc 1 327 0
+ 553 01b8 88EF      		ldi r24,lo8(-8)
+ 554 01ba 8DB9      		out 0xd,r24
+ 328:../i2c.c      ****                 (1<<USIWM1)|(1<<USIWM0)|                            // Set USI in Two-wire mode.
+ 329:../i2c.c      ****                 (1<<USICS1)|(0<<USICS0)|(0<<USICLK)|                // Shift Register Clock Source 
+ 330:../i2c.c      ****                 (0<<USITC);
+ 331:../i2c.c      ****     USISR  =    (1<<USI_START_COND_INT)|(1<<USIOIF)|(1<<USIPF)|(1<<USIDC)|      // Clear flags
+ 555               		.loc 1 331 0
+ 556 01bc 80EF      		ldi r24,lo8(-16)
+ 557 01be 8EB9      		out 0xe,r24
+ 558               	/* epilogue start */
+ 332:../i2c.c      ****                 (0x0<<USICNT0);                                     // Set USI to sample 8 bits i.e
+ 333:../i2c.c      ****     
+ 334:../i2c.c      **** }
+ 559               		.loc 1 334 0
+ 560 01c0 8F91      		pop r24
+ 561 01c2 0F90      		pop r0
+ 562 01c4 0FBE      		out __SREG__,r0
+ 563 01c6 0F90      		pop r0
+ 564 01c8 1F90      		pop r1
+ 565 01ca 1895      		reti
+ 566               		.cfi_endproc
+ 567               	.LFE16:
+ 569               	.global	__vector_14
+ 571               	__vector_14:
+ 572               	.LFB17:
+ 335:../i2c.c      **** 
+ 336:../i2c.c      **** 
+ 337:../i2c.c      **** /* brief USI counter overflow ISR
+ 338:../i2c.c      ****  * Handels all the comunication. Is disabled only when waiting
+ 339:../i2c.c      ****  * for new Start Condition.
+ 340:../i2c.c      ****  */
+ 341:../i2c.c      **** 
+ 342:../i2c.c      **** ISR(USI_OVERFLOW_VECTOR)
+ 343:../i2c.c      **** {
+ 573               		.loc 1 343 0
+ 574               		.cfi_startproc
+ 575 01cc 1F92      		push r1
+ 576               	.LCFI11:
+ 577               		.cfi_def_cfa_offset 3
+ 578               		.cfi_offset 1, -2
+ 579 01ce 0F92      		push r0
+ 580               	.LCFI12:
+ 581               		.cfi_def_cfa_offset 4
+ 582               		.cfi_offset 0, -3
+ 583 01d0 0FB6      		in r0,__SREG__
+ 584 01d2 0F92      		push r0
+ 585 01d4 1124      		clr __zero_reg__
+ 586 01d6 8F93      		push r24
+ 587               	.LCFI13:
+ 588               		.cfi_def_cfa_offset 5
+ 589               		.cfi_offset 24, -4
+ 590 01d8 9F93      		push r25
+ 591               	.LCFI14:
+ 592               		.cfi_def_cfa_offset 6
+ 593               		.cfi_offset 25, -5
+ 594 01da EF93      		push r30
+ 595               	.LCFI15:
+ 596               		.cfi_def_cfa_offset 7
+ 597               		.cfi_offset 30, -6
+ 598 01dc FF93      		push r31
+ 599               	.LCFI16:
+ 600               		.cfi_def_cfa_offset 8
+ 601               		.cfi_offset 31, -7
+ 602               	/* prologue: Signal */
+ 603               	/* frame size = 0 */
+ 604               	/* stack size = 7 */
+ 605               	.L__stack_usage = 7
+ 344:../i2c.c      ****   unsigned char tmpTxTail;     // Temporary variables to store volatiles
+ 345:../i2c.c      ****   unsigned char tmpUSIDR;
+ 346:../i2c.c      **** 
+ 347:../i2c.c      **** 
+ 348:../i2c.c      ****   switch (USI_TWI_Overflow_State)
+ 606               		.loc 1 348 0
+ 607 01de 8091 0000 		lds r24,USI_TWI_Overflow_State
+ 608 01e2 8230      		cpi r24,lo8(2)
+ 609 01e4 01F4      		brne .+2
+ 610 01e6 00C0      		rjmp .L38
+ 611 01e8 00F4      		brsh .L39
+ 612 01ea 8823      		tst r24
+ 613 01ec 01F0      		breq .L40
+ 614 01ee 8130      		cpi r24,lo8(1)
+ 615 01f0 01F0      		breq .L41
+ 616 01f2 00C0      		rjmp .L36
+ 617               	.L39:
+ 618 01f4 8430      		cpi r24,lo8(4)
+ 619 01f6 01F4      		brne .+2
+ 620 01f8 00C0      		rjmp .L42
+ 621 01fa 00F0      		brlo .L43
+ 622 01fc 8530      		cpi r24,lo8(5)
+ 623 01fe 01F0      		breq .+2
+ 624 0200 00C0      		rjmp .L36
+ 349:../i2c.c      ****   {
+ 350:../i2c.c      ****     // ---------- Address mode ----------
+ 351:../i2c.c      ****     // Check address and send ACK (and next USI_SLAVE_SEND_DATA) if OK, else reset USI.
+ 352:../i2c.c      ****     case USI_SLAVE_CHECK_ADDRESS:
+ 353:../i2c.c      ****       if ((USIDR == 0) || (( USIDR>>1 ) == TWI_slaveAddress))
+ 354:../i2c.c      ****       {
+ 355:../i2c.c      ****         if ( USIDR & 0x01 )
+ 356:../i2c.c      ****           USI_TWI_Overflow_State = USI_SLAVE_SEND_DATA;
+ 357:../i2c.c      ****         else
+ 358:../i2c.c      ****           USI_TWI_Overflow_State = USI_SLAVE_REQUEST_DATA;
+ 359:../i2c.c      ****         SET_USI_TO_SEND_ACK();
+ 360:../i2c.c      ****       }
+ 361:../i2c.c      ****       else
+ 362:../i2c.c      ****       {
+ 363:../i2c.c      ****         SET_USI_TO_TWI_START_CONDITION_MODE();
+ 364:../i2c.c      ****       }
+ 365:../i2c.c      ****       break;
+ 366:../i2c.c      **** 
+ 367:../i2c.c      ****     // ----- Master write data mode ------
+ 368:../i2c.c      ****     // Check reply and goto USI_SLAVE_SEND_DATA if OK, else reset USI.
+ 369:../i2c.c      ****     case USI_SLAVE_CHECK_REPLY_FROM_SEND_DATA:
+ 370:../i2c.c      ****       if ( USIDR ) // If NACK, the master does not want more data.
+ 371:../i2c.c      ****       {
+ 372:../i2c.c      ****         SET_USI_TO_TWI_START_CONDITION_MODE();
+ 373:../i2c.c      ****         return;
+ 374:../i2c.c      ****       }
+ 375:../i2c.c      ****       // From here we just drop straight into USI_SLAVE_SEND_DATA if the master sent an ACK
+ 376:../i2c.c      **** 
+ 377:../i2c.c      ****     // Copy data from buffer to USIDR and set USI to shift byte. Next USI_SLAVE_REQUEST_REPLY_FROM_
+ 378:../i2c.c      ****     case USI_SLAVE_SEND_DATA:
+ 379:../i2c.c      **** 
+ 380:../i2c.c      ****       // Get data from Buffer
+ 381:../i2c.c      ****       tmpTxTail = TWI_TxTail;           // Not necessary, but prevents warnings
+ 382:../i2c.c      ****       if ( TWI_TxHead != tmpTxTail )
+ 383:../i2c.c      ****       {
+ 384:../i2c.c      ****         TWI_TxTail = ( TWI_TxTail + 1 ) & TWI_TX_BUFFER_MASK;
+ 385:../i2c.c      ****         USIDR = TWI_TxBuf[TWI_TxTail];
+ 386:../i2c.c      ****       }
+ 387:../i2c.c      ****       else // If the buffer is empty then:
+ 388:../i2c.c      ****       {
+ 389:../i2c.c      ****           SET_USI_TO_TWI_START_CONDITION_MODE();
+ 390:../i2c.c      ****           return;
+ 391:../i2c.c      ****       }
+ 392:../i2c.c      ****       USI_TWI_Overflow_State = USI_SLAVE_REQUEST_REPLY_FROM_SEND_DATA;
+ 393:../i2c.c      ****       SET_USI_TO_SEND_DATA();
+ 394:../i2c.c      ****       break;
+ 395:../i2c.c      **** 
+ 396:../i2c.c      ****     // Set USI to sample reply from master. Next USI_SLAVE_CHECK_REPLY_FROM_SEND_DATA
+ 397:../i2c.c      ****     case USI_SLAVE_REQUEST_REPLY_FROM_SEND_DATA:
+ 398:../i2c.c      ****       USI_TWI_Overflow_State = USI_SLAVE_CHECK_REPLY_FROM_SEND_DATA;
+ 399:../i2c.c      ****       SET_USI_TO_READ_ACK();
+ 400:../i2c.c      ****       break;
+ 401:../i2c.c      **** 
+ 402:../i2c.c      ****     // ----- Master read data mode ------
+ 403:../i2c.c      ****     // Set USI to sample data from master. Next USI_SLAVE_GET_DATA_AND_SEND_ACK.
+ 404:../i2c.c      ****     case USI_SLAVE_REQUEST_DATA:
+ 405:../i2c.c      ****       USI_TWI_Overflow_State = USI_SLAVE_GET_DATA_AND_SEND_ACK;
+ 406:../i2c.c      ****       SET_USI_TO_READ_DATA();
+ 407:../i2c.c      ****       break;
+ 408:../i2c.c      **** 
+ 409:../i2c.c      ****     // Copy data from USIDR and send ACK. Next USI_SLAVE_REQUEST_DATA
+ 410:../i2c.c      ****     case USI_SLAVE_GET_DATA_AND_SEND_ACK:
+ 411:../i2c.c      ****       // Put data into Buffer
+ 412:../i2c.c      ****       tmpUSIDR = USIDR;             // Not necessary, but prevents warnings
+ 625               		.loc 1 412 0
+ 626 0202 9FB1      		in r25,0xf
+ 627               	.LVL32:
+ 413:../i2c.c      ****       TWI_RxHead = ( TWI_RxHead + 1 ) & TWI_RX_BUFFER_MASK;
+ 628               		.loc 1 413 0
+ 629 0204 8091 0000 		lds r24,TWI_RxHead
+ 630 0208 8F5F      		subi r24,lo8(-(1))
+ 631 020a 8F70      		andi r24,lo8(15)
+ 632 020c 8093 0000 		sts TWI_RxHead,r24
+ 414:../i2c.c      ****       TWI_RxBuf[TWI_RxHead] = tmpUSIDR;
+ 633               		.loc 1 414 0
+ 634 0210 E091 0000 		lds r30,TWI_RxHead
+ 635 0214 F0E0      		ldi r31,0
+ 636 0216 E050      		subi r30,lo8(-(TWI_RxBuf))
+ 637 0218 F040      		sbci r31,hi8(-(TWI_RxBuf))
+ 638 021a 9083      		st Z,r25
+ 639 021c 00C0      		rjmp .L65
+ 640               	.LVL33:
+ 641               	.L40:
+ 353:../i2c.c      ****       if ((USIDR == 0) || (( USIDR>>1 ) == TWI_slaveAddress))
+ 642               		.loc 1 353 0
+ 643 021e 8FB1      		in r24,0xf
+ 644 0220 8823      		tst r24
+ 645 0222 01F0      		breq .L45
+ 353:../i2c.c      ****       if ((USIDR == 0) || (( USIDR>>1 ) == TWI_slaveAddress))
+ 646               		.loc 1 353 0 is_stmt 0 discriminator 1
+ 647 0224 8FB1      		in r24,0xf
+ 648 0226 8695      		lsr r24
+ 649 0228 9091 0000 		lds r25,TWI_slaveAddress
+ 650 022c 8913      		cpse r24,r25
+ 651 022e 00C0      		rjmp .L49
+ 652               	.L45:
+ 355:../i2c.c      ****         if ( USIDR & 0x01 )
+ 653               		.loc 1 355 0 is_stmt 1
+ 654 0230 789B      		sbis 0xf,0
+ 655 0232 00C0      		rjmp .L65
+ 356:../i2c.c      ****           USI_TWI_Overflow_State = USI_SLAVE_SEND_DATA;
+ 656               		.loc 1 356 0
+ 657 0234 81E0      		ldi r24,lo8(1)
+ 658 0236 00C0      		rjmp .L63
+ 659               	.L43:
+ 370:../i2c.c      ****       if ( USIDR ) // If NACK, the master does not want more data.
+ 660               		.loc 1 370 0
+ 661 0238 8FB1      		in r24,0xf
+ 662 023a 8111      		cpse r24,__zero_reg__
+ 663 023c 00C0      		rjmp .L49
+ 664               	.L41:
+ 381:../i2c.c      ****       tmpTxTail = TWI_TxTail;           // Not necessary, but prevents warnings
+ 665               		.loc 1 381 0
+ 666 023e 8091 0000 		lds r24,TWI_TxTail
+ 667               	.LVL34:
+ 382:../i2c.c      ****       if ( TWI_TxHead != tmpTxTail )
+ 668               		.loc 1 382 0
+ 669 0242 9091 0000 		lds r25,TWI_TxHead
+ 670 0246 9817      		cp r25,r24
+ 671 0248 01F0      		breq .L49
+ 384:../i2c.c      ****         TWI_TxTail = ( TWI_TxTail + 1 ) & TWI_TX_BUFFER_MASK;
+ 672               		.loc 1 384 0
+ 673 024a 8091 0000 		lds r24,TWI_TxTail
+ 674               	.LVL35:
+ 675 024e 8F5F      		subi r24,lo8(-(1))
+ 676 0250 8F70      		andi r24,lo8(15)
+ 677 0252 8093 0000 		sts TWI_TxTail,r24
+ 385:../i2c.c      ****         USIDR = TWI_TxBuf[TWI_TxTail];
+ 678               		.loc 1 385 0
+ 679 0256 E091 0000 		lds r30,TWI_TxTail
+ 680 025a F0E0      		ldi r31,0
+ 681 025c E050      		subi r30,lo8(-(TWI_TxBuf))
+ 682 025e F040      		sbci r31,hi8(-(TWI_TxBuf))
+ 683 0260 8081      		ld r24,Z
+ 684 0262 8FB9      		out 0xf,r24
+ 392:../i2c.c      ****       USI_TWI_Overflow_State = USI_SLAVE_REQUEST_REPLY_FROM_SEND_DATA;
+ 685               		.loc 1 392 0
+ 686 0264 82E0      		ldi r24,lo8(2)
+ 687 0266 8093 0000 		sts USI_TWI_Overflow_State,r24
+ 393:../i2c.c      ****       SET_USI_TO_SEND_DATA();
+ 688               		.loc 1 393 0
+ 689 026a B89A      		sbi 0x17,0
+ 690 026c 00C0      		rjmp .L64
+ 691               	.L49:
+ 389:../i2c.c      ****           SET_USI_TO_TWI_START_CONDITION_MODE();
+ 692               		.loc 1 389 0
+ 693 026e 88EA      		ldi r24,lo8(-88)
+ 694 0270 8DB9      		out 0xd,r24
+ 695 0272 00C0      		rjmp .L64
+ 696               	.L38:
+ 398:../i2c.c      ****       USI_TWI_Overflow_State = USI_SLAVE_CHECK_REPLY_FROM_SEND_DATA;
+ 697               		.loc 1 398 0
+ 698 0274 83E0      		ldi r24,lo8(3)
+ 699 0276 8093 0000 		sts USI_TWI_Overflow_State,r24
+ 399:../i2c.c      ****       SET_USI_TO_READ_ACK();
+ 700               		.loc 1 399 0
+ 701 027a B898      		cbi 0x17,0
+ 702 027c 1FB8      		out 0xf,__zero_reg__
+ 703 027e 00C0      		rjmp .L60
+ 704               	.L42:
+ 405:../i2c.c      ****       USI_TWI_Overflow_State = USI_SLAVE_GET_DATA_AND_SEND_ACK;
+ 705               		.loc 1 405 0
+ 706 0280 85E0      		ldi r24,lo8(5)
+ 707 0282 8093 0000 		sts USI_TWI_Overflow_State,r24
+ 406:../i2c.c      ****       SET_USI_TO_READ_DATA();
+ 708               		.loc 1 406 0
+ 709 0286 B898      		cbi 0x17,0
+ 710               	.L64:
+ 711 0288 80E7      		ldi r24,lo8(112)
+ 712 028a 00C0      		rjmp .L61
+ 713               	.L65:
+ 415:../i2c.c      **** 
+ 416:../i2c.c      ****       USI_TWI_Overflow_State = USI_SLAVE_REQUEST_DATA;
+ 714               		.loc 1 416 0
+ 715 028c 84E0      		ldi r24,lo8(4)
+ 716               	.L63:
+ 717 028e 8093 0000 		sts USI_TWI_Overflow_State,r24
+ 417:../i2c.c      ****       SET_USI_TO_SEND_ACK();
+ 718               		.loc 1 417 0
+ 719 0292 1FB8      		out 0xf,__zero_reg__
+ 720 0294 B89A      		sbi 0x17,0
+ 721               	.L60:
+ 722 0296 8EE7      		ldi r24,lo8(126)
+ 723               	.L61:
+ 724 0298 8EB9      		out 0xe,r24
+ 725               	.L36:
+ 726               	/* epilogue start */
+ 418:../i2c.c      ****       break;
+ 419:../i2c.c      ****   }
+ 420:../i2c.c      **** }
+ 727               		.loc 1 420 0
+ 728 029a FF91      		pop r31
+ 729 029c EF91      		pop r30
+ 730 029e 9F91      		pop r25
+ 731 02a0 8F91      		pop r24
+ 732 02a2 0F90      		pop r0
+ 733 02a4 0FBE      		out __SREG__,r0
+ 734 02a6 0F90      		pop r0
+ 735 02a8 1F90      		pop r1
+ 736 02aa 1895      		reti
+ 737               		.cfi_endproc
+ 738               	.LFE17:
+ 740               		.local	TWI_TxTail
+ 741               		.comm	TWI_TxTail,1,1
+ 742               		.local	TWI_TxHead
+ 743               		.comm	TWI_TxHead,1,1
+ 744               		.local	TWI_TxBuf
+ 745               		.comm	TWI_TxBuf,16,1
+ 746               		.local	TWI_RxTail
+ 747               		.comm	TWI_RxTail,1,1
+ 748               		.local	TWI_RxHead
+ 749               		.comm	TWI_RxHead,1,1
+ 750               		.local	TWI_RxBuf
+ 751               		.comm	TWI_RxBuf,16,1
+ 752               		.local	USI_TWI_Overflow_State
+ 753               		.comm	USI_TWI_Overflow_State,1,1
+ 754               		.local	TWI_slaveAddress
+ 755               		.comm	TWI_slaveAddress,1,1
+ 756               		.comm	USI_TWI_state,1,1
+ 757               	.Letext0:
+ 758               		.file 3 "/usr/local/CrossPack-AVR-20131216/avr/include/stdint.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 i2c.c
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:2      *ABS*:0000003e __SP_H__
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:3      *ABS*:0000003d __SP_L__
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:4      *ABS*:0000003f __SREG__
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:5      *ABS*:00000000 __tmp_reg__
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:6      *ABS*:00000001 __zero_reg__
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:12     .text:00000000 i2cMInitialize
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:44     .text:00000016 i2cMGetStateInfo
+                            *COM*:00000001 USI_TWI_state
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:60     .text:0000001c USI_TWI_Master_Transfer
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:129    .text:00000048 USI_TWI_Master_Stop
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:173    .text:00000062 i2cMTransceive
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:342    .text:0000010e i2cSFlushBuffers
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:745    .bss:00000012 TWI_RxTail
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:747    .bss:00000013 TWI_RxHead
+                             .bss:00000000 TWI_TxTail
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:741    .bss:00000001 TWI_TxHead
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:364    .text:00000120 i2cSInitialize
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:753    .bss:00000025 TWI_slaveAddress
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:426    .text:0000014e i2cSTransmitByte
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:743    .bss:00000002 TWI_TxBuf
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:459    .text:0000016e i2cSReceiveByte
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:749    .bss:00000014 TWI_RxBuf
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:496    .text:00000190 i2cSCheckBufferNonempty
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:521    .text:000001a2 __vector_13
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:751    .bss:00000024 USI_TWI_Overflow_State
+/var/folders/r8/lvs4pl7j62n7jpxlwq5fkclm0000gn/T//cc3RNhFn.s:571    .text:000001cc __vector_14
+
+UNDEFINED SYMBOLS
+__do_clear_bss

@@ -1,0 +1,936 @@
+
+master.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         000003be  00000000  00000000  00000094  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00800060  000003be  00000452  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000027  00800060  00800060  00000452  2**0
+                  ALLOC
+  3 .comment      00000011  00000000  00000000  00000452  2**0
+                  CONTENTS, READONLY
+  4 .debug_aranges 00000088  00000000  00000000  00000468  2**3
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_info   00000a8b  00000000  00000000  000004f0  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_abbrev 0000048f  00000000  00000000  00000f7b  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_line   00000382  00000000  00000000  0000140a  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_frame  00000190  00000000  00000000  0000178c  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_str    00000377  00000000  00000000  0000191c  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_loc    0000037c  00000000  00000000  00001c93  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_ranges 00000018  00000000  00000000  0000200f  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0e c0       	rjmp	.+28     	; 0x1e <__ctors_end>
+   2:	1d c0       	rjmp	.+58     	; 0x3e <__bad_interrupt>
+   4:	1c c0       	rjmp	.+56     	; 0x3e <__bad_interrupt>
+   6:	1b c0       	rjmp	.+54     	; 0x3e <__bad_interrupt>
+   8:	1a c0       	rjmp	.+52     	; 0x3e <__bad_interrupt>
+   a:	19 c0       	rjmp	.+50     	; 0x3e <__bad_interrupt>
+   c:	18 c0       	rjmp	.+48     	; 0x3e <__bad_interrupt>
+   e:	17 c0       	rjmp	.+46     	; 0x3e <__bad_interrupt>
+  10:	16 c0       	rjmp	.+44     	; 0x3e <__bad_interrupt>
+  12:	15 c0       	rjmp	.+42     	; 0x3e <__bad_interrupt>
+  14:	14 c0       	rjmp	.+40     	; 0x3e <__bad_interrupt>
+  16:	13 c0       	rjmp	.+38     	; 0x3e <__bad_interrupt>
+  18:	12 c0       	rjmp	.+36     	; 0x3e <__bad_interrupt>
+  1a:	24 c1       	rjmp	.+584    	; 0x264 <__vector_13>
+  1c:	38 c1       	rjmp	.+624    	; 0x28e <__vector_14>
+
+0000001e <__ctors_end>:
+  1e:	11 24       	eor	r1, r1
+  20:	1f be       	out	0x3f, r1	; 63
+  22:	cf e5       	ldi	r28, 0x5F	; 95
+  24:	d2 e0       	ldi	r29, 0x02	; 2
+  26:	de bf       	out	0x3e, r29	; 62
+  28:	cd bf       	out	0x3d, r28	; 61
+
+0000002a <__do_clear_bss>:
+  2a:	20 e0       	ldi	r18, 0x00	; 0
+  2c:	a0 e6       	ldi	r26, 0x60	; 96
+  2e:	b0 e0       	ldi	r27, 0x00	; 0
+  30:	01 c0       	rjmp	.+2      	; 0x34 <.do_clear_bss_start>
+
+00000032 <.do_clear_bss_loop>:
+  32:	1d 92       	st	X+, r1
+
+00000034 <.do_clear_bss_start>:
+  34:	a7 38       	cpi	r26, 0x87	; 135
+  36:	b2 07       	cpc	r27, r18
+  38:	e1 f7       	brne	.-8      	; 0x32 <.do_clear_bss_loop>
+  3a:	99 d1       	rcall	.+818    	; 0x36e <main>
+  3c:	be c1       	rjmp	.+892    	; 0x3ba <_exit>
+
+0000003e <__bad_interrupt>:
+  3e:	e0 cf       	rjmp	.-64     	; 0x0 <__vectors>
+
+00000040 <flash>:
+#define green 3
+#define red 4
+
+void flash()
+{
+	PORTB |= 0b1000;
+  40:	c3 9a       	sbi	0x18, 3	; 24
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+  42:	87 ea       	ldi	r24, 0xA7	; 167
+  44:	91 e6       	ldi	r25, 0x61	; 97
+  46:	01 97       	sbiw	r24, 0x01	; 1
+  48:	f1 f7       	brne	.-4      	; 0x46 <flash+0x6>
+  4a:	00 c0       	rjmp	.+0      	; 0x4c <flash+0xc>
+  4c:	00 00       	nop
+	_delay_ms(100);
+	PORTB ^= 0b1000;
+  4e:	88 b3       	in	r24, 0x18	; 24
+  50:	98 e0       	ldi	r25, 0x08	; 8
+  52:	89 27       	eor	r24, r25
+  54:	88 bb       	out	0x18, r24	; 24
+  56:	87 ea       	ldi	r24, 0xA7	; 167
+  58:	91 e6       	ldi	r25, 0x61	; 97
+  5a:	01 97       	sbiw	r24, 0x01	; 1
+  5c:	f1 f7       	brne	.-4      	; 0x5a <flash+0x1a>
+  5e:	00 c0       	rjmp	.+0      	; 0x60 <flash+0x20>
+  60:	00 00       	nop
+  62:	08 95       	ret
+
+00000064 <displayByte>:
+}
+
+void displayByte(char byte)
+{
+	//DDRB |= 0b11000;i2c
+	unsigned int bit = 0;
+  64:	20 e0       	ldi	r18, 0x00	; 0
+  66:	30 e0       	ldi	r19, 0x00	; 0
+	while(bit < 8)
+	{
+		_delay_ms(50);
+
+		//If bit is 1
+		if(1 & (byte >> bit))
+  68:	90 e0       	ldi	r25, 0x00	; 0
+  6a:	e3 ed       	ldi	r30, 0xD3	; 211
+  6c:	f0 e3       	ldi	r31, 0x30	; 48
+  6e:	31 97       	sbiw	r30, 0x01	; 1
+  70:	f1 f7       	brne	.-4      	; 0x6e <displayByte+0xa>
+  72:	00 c0       	rjmp	.+0      	; 0x74 <displayByte+0x10>
+  74:	00 00       	nop
+  76:	ac 01       	movw	r20, r24
+  78:	02 2e       	mov	r0, r18
+  7a:	02 c0       	rjmp	.+4      	; 0x80 <displayByte+0x1c>
+  7c:	55 95       	asr	r21
+  7e:	47 95       	ror	r20
+  80:	0a 94       	dec	r0
+  82:	e2 f7       	brpl	.-8      	; 0x7c <displayByte+0x18>
+  84:	40 ff       	sbrs	r20, 0
+  86:	0c c0       	rjmp	.+24     	; 0xa0 <displayByte+0x3c>
+		{
+			PORTB |= 0b1000;
+  88:	c3 9a       	sbi	0x18, 3	; 24
+  8a:	ff e5       	ldi	r31, 0x5F	; 95
+  8c:	4a ee       	ldi	r20, 0xEA	; 234
+  8e:	50 e0       	ldi	r21, 0x00	; 0
+  90:	f1 50       	subi	r31, 0x01	; 1
+  92:	40 40       	sbci	r20, 0x00	; 0
+  94:	50 40       	sbci	r21, 0x00	; 0
+  96:	e1 f7       	brne	.-8      	; 0x90 <displayByte+0x2c>
+  98:	00 c0       	rjmp	.+0      	; 0x9a <displayByte+0x36>
+  9a:	00 00       	nop
+			_delay_ms(300);
+			PORTB &= ~(0b1000);
+  9c:	c3 98       	cbi	0x18, 3	; 24
+  9e:	0b c0       	rjmp	.+22     	; 0xb6 <displayByte+0x52>
+		}
+		else //If bit is 0
+		{
+			PORTB |= 0b10000;
+  a0:	c4 9a       	sbi	0x18, 4	; 24
+  a2:	6f e5       	ldi	r22, 0x5F	; 95
+  a4:	ea ee       	ldi	r30, 0xEA	; 234
+  a6:	f0 e0       	ldi	r31, 0x00	; 0
+  a8:	61 50       	subi	r22, 0x01	; 1
+  aa:	e0 40       	sbci	r30, 0x00	; 0
+  ac:	f0 40       	sbci	r31, 0x00	; 0
+  ae:	e1 f7       	brne	.-8      	; 0xa8 <displayByte+0x44>
+  b0:	00 c0       	rjmp	.+0      	; 0xb2 <displayByte+0x4e>
+  b2:	00 00       	nop
+			_delay_ms(300);
+			PORTB &= ~(0b10000);
+  b4:	c4 98       	cbi	0x18, 4	; 24
+		}
+
+		bit++;
+  b6:	2f 5f       	subi	r18, 0xFF	; 255
+  b8:	3f 4f       	sbci	r19, 0xFF	; 255
+
+void displayByte(char byte)
+{
+	//DDRB |= 0b11000;i2c
+	unsigned int bit = 0;
+	while(bit < 8)
+  ba:	28 30       	cpi	r18, 0x08	; 8
+  bc:	31 05       	cpc	r19, r1
+  be:	a9 f6       	brne	.-86     	; 0x6a <displayByte+0x6>
+			PORTB &= ~(0b10000);
+		}
+
+		bit++;
+	}
+}
+  c0:	08 95       	ret
+
+000000c2 <i2cMInitialize>:
+/*---------------------------------------------------------------
+ USI TWI single master initialization function
+---------------------------------------------------------------*/
+void i2cMInitialize()
+{
+  PORT_USI |= (1<<PIN_USI_SDA);           // Enable pullup on SDA, to set high as released state.
+  c2:	c0 9a       	sbi	0x18, 0	; 24
+  PORT_USI |= (1<<PIN_USI_SCL);           // Enable pullup on SCL, to set high as released state.
+  c4:	c2 9a       	sbi	0x18, 2	; 24
+  
+  DDR_USI  |= (1<<PIN_USI_SCL);           // Enable SCL as output.
+  c6:	ba 9a       	sbi	0x17, 2	; 23
+  DDR_USI  |= (1<<PIN_USI_SDA);           // Enable SDA as output.
+  c8:	b8 9a       	sbi	0x17, 0	; 23
+  
+  USIDR    =  0xFF;                       // Preload dataregister with "released level" data.
+  ca:	8f ef       	ldi	r24, 0xFF	; 255
+  cc:	8f b9       	out	0x0f, r24	; 15
+  USICR    =  (0<<USISIE)|(0<<USIOIE)|                            // Disable Interrupts.
+  ce:	8a e2       	ldi	r24, 0x2A	; 42
+  d0:	8d b9       	out	0x0d, r24	; 13
+              (1<<USIWM1)|(0<<USIWM0)|                            // Set USI in Two-wire mode.
+              (1<<USICS1)|(0<<USICS0)|(1<<USICLK)|                // Software stobe as counter clock source
+              (0<<USITC);
+  USISR   =   (1<<USISIF)|(1<<USIOIF)|(1<<USIPF)|(1<<USIDC)|      // Clear flags,
+  d2:	80 ef       	ldi	r24, 0xF0	; 240
+  d4:	8e b9       	out	0x0e, r24	; 14
+  d6:	08 95       	ret
+
+000000d8 <i2cMGetStateInfo>:
+Use this function to get hold of the error message from the last transmission
+---------------------------------------------------------------*/
+unsigned char i2cMGetStateInfo( void )
+{
+  return ( USI_TWI_state.errorState );                            // Return error state.
+}
+  d8:	80 91 86 00 	lds	r24, 0x0086
+  dc:	08 95       	ret
+
+000000de <USI_TWI_Master_Transfer>:
+ Data to be sent has to be placed into the USIDR prior to calling
+ this function. Data read, will be return'ed from the function.
+---------------------------------------------------------------*/
+unsigned char USI_TWI_Master_Transfer( unsigned char temp )
+{
+  USISR = temp;                                     // Set USISR according to temp.
+  de:	8e b9       	out	0x0e, r24	; 14
+           (1<<USICS1)|(0<<USICS0)|(1<<USICLK)|     // Software clock strobe as source.
+           (1<<USITC);                              // Toggle Clock Port.
+  do
+  {
+    _delay_us( DELAY_TIME );            
+    USICR = temp;                          // Generate positve SCL edge.
+  e0:	8b e2       	ldi	r24, 0x2B	; 43
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+  e2:	00 c0       	rjmp	.+0      	; 0xe4 <USI_TWI_Master_Transfer+0x6>
+  e4:	00 c0       	rjmp	.+0      	; 0xe6 <USI_TWI_Master_Transfer+0x8>
+  e6:	00 00       	nop
+  e8:	8d b9       	out	0x0d, r24	; 13
+    while( !(PIN_USI & (1<<PIN_USI_SCL)) );// Wait for SCL to go high.
+  ea:	b2 9b       	sbis	0x16, 2	; 22
+  ec:	fe cf       	rjmp	.-4      	; 0xea <USI_TWI_Master_Transfer+0xc>
+  ee:	00 c0       	rjmp	.+0      	; 0xf0 <USI_TWI_Master_Transfer+0x12>
+  f0:	00 c0       	rjmp	.+0      	; 0xf2 <USI_TWI_Master_Transfer+0x14>
+  f2:	00 00       	nop
+    _delay_us( DELAY_TIME );               
+    USICR = temp;                          // Generate negative SCL edge.
+  f4:	8d b9       	out	0x0d, r24	; 13
+  }while( !(USISR & (1<<USIOIF)) );        // Check for transfer complete.
+  f6:	76 9b       	sbis	0x0e, 6	; 14
+  f8:	f4 cf       	rjmp	.-24     	; 0xe2 <USI_TWI_Master_Transfer+0x4>
+  fa:	00 c0       	rjmp	.+0      	; 0xfc <USI_TWI_Master_Transfer+0x1e>
+  fc:	00 c0       	rjmp	.+0      	; 0xfe <USI_TWI_Master_Transfer+0x20>
+  fe:	00 00       	nop
+  
+  _delay_us( DELAY_TIME );           
+  temp  = USIDR;                           // Read out data.
+ 100:	8f b1       	in	r24, 0x0f	; 15
+  USIDR = 0xFF;                            // Release SDA.
+ 102:	9f ef       	ldi	r25, 0xFF	; 255
+ 104:	9f b9       	out	0x0f, r25	; 15
+  DDR_USI |= (1<<PIN_USI_SDA);             // Enable SDA as output.
+ 106:	b8 9a       	sbi	0x17, 0	; 23
+
+  return temp;                             // Return the data from the USIDR
+}
+ 108:	08 95       	ret
+
+0000010a <USI_TWI_Master_Stop>:
+ Internal function for generating a TWI Stop Condition. 
+ Used to release the TWI bus.
+---------------------------------------------------------------*/
+unsigned char USI_TWI_Master_Stop( void )
+{
+  PORT_USI &= ~(1<<PIN_USI_SDA);           // Pull SDA low.
+ 10a:	c0 98       	cbi	0x18, 0	; 24
+  PORT_USI |= (1<<PIN_USI_SCL);            // Release SCL.
+ 10c:	c2 9a       	sbi	0x18, 2	; 24
+  while( !(PIN_USI & (1<<PIN_USI_SCL)) );  // Wait for SCL to go high.
+ 10e:	b2 9b       	sbis	0x16, 2	; 22
+ 110:	fe cf       	rjmp	.-4      	; 0x10e <USI_TWI_Master_Stop+0x4>
+ 112:	00 c0       	rjmp	.+0      	; 0x114 <USI_TWI_Master_Stop+0xa>
+ 114:	00 c0       	rjmp	.+0      	; 0x116 <USI_TWI_Master_Stop+0xc>
+ 116:	00 00       	nop
+  _delay_us( DELAY_TIME );             
+  PORT_USI |= (1<<PIN_USI_SDA);            // Release SDA.
+ 118:	c0 9a       	sbi	0x18, 0	; 24
+ 11a:	00 c0       	rjmp	.+0      	; 0x11c <USI_TWI_Master_Stop+0x12>
+ 11c:	00 c0       	rjmp	.+0      	; 0x11e <USI_TWI_Master_Stop+0x14>
+ 11e:	00 00       	nop
+  _delay_us( DELAY_TIME );                
+  
+  return (TRUE);
+}
+ 120:	81 e0       	ldi	r24, 0x01	; 1
+ 122:	08 95       	ret
+
+00000124 <i2cMTransceive>:
+ 
+ Success or error code is returned. Error codes are defined in 
+ USI_TWI_Master.h
+---------------------------------------------------------------*/
+unsigned char i2cMTransceive( unsigned char *msg, unsigned char msgSize)
+{
+ 124:	0f 93       	push	r16
+ 126:	1f 93       	push	r17
+ 128:	cf 93       	push	r28
+ 12a:	df 93       	push	r29
+ 12c:	16 2f       	mov	r17, r22
+                                 (0x0<<USICNT0);                                     // set USI to shift 8 bits i.e. count 16 clock edges.
+  unsigned char tempUSISR_1bit = (1<<USISIF)|(1<<USIOIF)|(1<<USIPF)|(1<<USIDC)|      // Prepare register value to: Clear flags, and
+                                 (0xE<<USICNT0);                                     // set USI to shift 1 bit i.e. count 2 clock edges.
+
+  USI_TWI_state.errorState = 0;
+  USI_TWI_state.addressMode = TRUE;
+ 12e:	21 e0       	ldi	r18, 0x01	; 1
+ 130:	20 93 86 00 	sts	0x0086, r18
+
+
+  if ( !(*msg & (1<<TWI_READ_BIT)) )                // The LSB in the address byte determines if is a masterRead or masterWrite operation.
+ 134:	fc 01       	movw	r30, r24
+ 136:	20 81       	ld	r18, Z
+ 138:	20 fd       	sbrc	r18, 0
+ 13a:	03 c0       	rjmp	.+6      	; 0x142 <i2cMTransceive+0x1e>
+  {
+    USI_TWI_state.masterWriteDataMode = TRUE;
+ 13c:	23 e0       	ldi	r18, 0x03	; 3
+ 13e:	20 93 86 00 	sts	0x0086, r18
+  }
+
+  /* Release SCL to ensure that (repeated) Start can be performed */
+  PORT_USI |= (1<<PIN_USI_SCL);                     // Release SCL.
+ 142:	c2 9a       	sbi	0x18, 2	; 24
+  while( !(PIN_USI & (1<<PIN_USI_SCL)) );          // Verify that SCL becomes high.
+ 144:	b2 9b       	sbis	0x16, 2	; 22
+ 146:	fe cf       	rjmp	.-4      	; 0x144 <i2cMTransceive+0x20>
+ 148:	00 c0       	rjmp	.+0      	; 0x14a <i2cMTransceive+0x26>
+ 14a:	00 c0       	rjmp	.+0      	; 0x14c <i2cMTransceive+0x28>
+ 14c:	00 00       	nop
+  _delay_us(DELAY_TIME);
+
+  /* Generate Start Condition */
+  PORT_USI &= ~(1<<PIN_USI_SDA);                    // Force SDA LOW.
+ 14e:	c0 98       	cbi	0x18, 0	; 24
+ 150:	00 c0       	rjmp	.+0      	; 0x152 <i2cMTransceive+0x2e>
+ 152:	00 c0       	rjmp	.+0      	; 0x154 <i2cMTransceive+0x30>
+ 154:	00 00       	nop
+  _delay_us(DELAY_TIME);                         
+  PORT_USI &= ~(1<<PIN_USI_SCL);                    // Pull SCL LOW.
+ 156:	c2 98       	cbi	0x18, 2	; 24
+  PORT_USI |= (1<<PIN_USI_SDA);                     // Release SDA.
+ 158:	c0 9a       	sbi	0x18, 0	; 24
+ 15a:	ec 01       	movw	r28, r24
+      *(msg++)  = USI_TWI_Master_Transfer( tempUSISR_8bit );
+
+      /* Prepare to generate ACK (or NACK in case of End Of Transmission) */
+      if( msgSize == 1)                            // If transmission of last byte was performed.
+      {
+        USIDR = 0xFF;                              // Load NACK to confirm End Of Transmission.
+ 15c:	0f ef       	ldi	r16, 0xFF	; 255
+
+  /*Write address and Read/Write data */
+  do
+  {
+    /* If masterWrite cycle (or inital address tranmission)*/
+    if (USI_TWI_state.addressMode || USI_TWI_state.masterWriteDataMode)
+ 15e:	80 91 86 00 	lds	r24, 0x0086
+ 162:	83 70       	andi	r24, 0x03	; 3
+ 164:	f9 f0       	breq	.+62     	; 0x1a4 <i2cMTransceive+0x80>
+    {
+      /* Write a byte */
+      PORT_USI &= ~(1<<PIN_USI_SCL);                // Pull SCL LOW.
+ 166:	c2 98       	cbi	0x18, 2	; 24
+      USIDR     = *(msg++);                        // Setup data.
+ 168:	88 81       	ld	r24, Y
+ 16a:	8f b9       	out	0x0f, r24	; 15
+      USI_TWI_Master_Transfer( tempUSISR_8bit );    // Send 8 bits on bus.
+ 16c:	80 ef       	ldi	r24, 0xF0	; 240
+ 16e:	b7 df       	rcall	.-146    	; 0xde <USI_TWI_Master_Transfer>
+      
+      /* Clock and verify (N)ACK from slave */
+      DDR_USI  &= ~(1<<PIN_USI_SDA);                // Enable SDA as input.
+ 170:	b8 98       	cbi	0x17, 0	; 23
+      if( USI_TWI_Master_Transfer( tempUSISR_1bit ) & (1<<TWI_NACK_BIT) ) 
+ 172:	8e ef       	ldi	r24, 0xFE	; 254
+ 174:	b4 df       	rcall	.-152    	; 0xde <USI_TWI_Master_Transfer>
+ 176:	80 ff       	sbrs	r24, 0
+ 178:	0f c0       	rjmp	.+30     	; 0x198 <i2cMTransceive+0x74>
+      {
+        if ( USI_TWI_state.addressMode )
+ 17a:	90 91 86 00 	lds	r25, 0x0086
+ 17e:	89 2f       	mov	r24, r25
+ 180:	81 70       	andi	r24, 0x01	; 1
+ 182:	90 ff       	sbrs	r25, 0
+ 184:	05 c0       	rjmp	.+10     	; 0x190 <i2cMTransceive+0x6c>
+          USI_TWI_state.errorState = USI_TWI_NO_ACK_ON_ADDRESS;
+ 186:	86 e0       	ldi	r24, 0x06	; 6
+ 188:	80 93 86 00 	sts	0x0086, r24
+        else
+          USI_TWI_state.errorState = USI_TWI_NO_ACK_ON_DATA;
+        return (FALSE);
+ 18c:	80 e0       	ldi	r24, 0x00	; 0
+ 18e:	1b c0       	rjmp	.+54     	; 0x1c6 <i2cMTransceive+0xa2>
+      if( USI_TWI_Master_Transfer( tempUSISR_1bit ) & (1<<TWI_NACK_BIT) ) 
+      {
+        if ( USI_TWI_state.addressMode )
+          USI_TWI_state.errorState = USI_TWI_NO_ACK_ON_ADDRESS;
+        else
+          USI_TWI_state.errorState = USI_TWI_NO_ACK_ON_DATA;
+ 190:	95 e0       	ldi	r25, 0x05	; 5
+ 192:	90 93 86 00 	sts	0x0086, r25
+ 196:	17 c0       	rjmp	.+46     	; 0x1c6 <i2cMTransceive+0xa2>
+        return (FALSE);
+      }
+      USI_TWI_state.addressMode = FALSE;            // Only perform address transmission once.
+ 198:	80 91 86 00 	lds	r24, 0x0086
+ 19c:	8e 7f       	andi	r24, 0xFE	; 254
+ 19e:	80 93 86 00 	sts	0x0086, r24
+ 1a2:	0b c0       	rjmp	.+22     	; 0x1ba <i2cMTransceive+0x96>
+    }
+    /* Else masterRead cycle*/
+    else
+    {
+      /* Read a data byte */
+      DDR_USI   &= ~(1<<PIN_USI_SDA);               // Enable SDA as input.
+ 1a4:	b8 98       	cbi	0x17, 0	; 23
+      *(msg++)  = USI_TWI_Master_Transfer( tempUSISR_8bit );
+ 1a6:	80 ef       	ldi	r24, 0xF0	; 240
+ 1a8:	9a df       	rcall	.-204    	; 0xde <USI_TWI_Master_Transfer>
+ 1aa:	88 83       	st	Y, r24
+
+      /* Prepare to generate ACK (or NACK in case of End Of Transmission) */
+      if( msgSize == 1)                            // If transmission of last byte was performed.
+ 1ac:	11 30       	cpi	r17, 0x01	; 1
+ 1ae:	11 f4       	brne	.+4      	; 0x1b4 <i2cMTransceive+0x90>
+      {
+        USIDR = 0xFF;                              // Load NACK to confirm End Of Transmission.
+ 1b0:	0f b9       	out	0x0f, r16	; 15
+ 1b2:	01 c0       	rjmp	.+2      	; 0x1b6 <i2cMTransceive+0x92>
+      }
+      else
+      {
+        USIDR = 0x00;                              // Load ACK. Set data register bit 7 (output for SDA) low.
+ 1b4:	1f b8       	out	0x0f, r1	; 15
+      }
+      USI_TWI_Master_Transfer( tempUSISR_1bit );   // Generate ACK/NACK.
+ 1b6:	8e ef       	ldi	r24, 0xFE	; 254
+ 1b8:	92 df       	rcall	.-220    	; 0xde <USI_TWI_Master_Transfer>
+    }
+  }while( --msgSize) ;                             // Until all data sent/received.
+ 1ba:	11 50       	subi	r17, 0x01	; 1
+ 1bc:	21 96       	adiw	r28, 0x01	; 1
+ 1be:	11 11       	cpse	r17, r1
+ 1c0:	ce cf       	rjmp	.-100    	; 0x15e <i2cMTransceive+0x3a>
+  
+  USI_TWI_Master_Stop();                           // Send a STOP condition on the TWI bus.
+ 1c2:	a3 df       	rcall	.-186    	; 0x10a <USI_TWI_Master_Stop>
+
+/* Transmission successfully completed*/
+  return (TRUE);
+ 1c4:	81 e0       	ldi	r24, 0x01	; 1
+}
+ 1c6:	df 91       	pop	r29
+ 1c8:	cf 91       	pop	r28
+ 1ca:	1f 91       	pop	r17
+ 1cc:	0f 91       	pop	r16
+ 1ce:	08 95       	ret
+
+000001d0 <i2cSFlushBuffers>:
+
+/*! \brief Flushes the TWI buffers
+ */
+void i2cSFlushBuffers(void)
+{
+    TWI_RxTail = 0;
+ 1d0:	10 92 72 00 	sts	0x0072, r1
+    TWI_RxHead = 0;
+ 1d4:	10 92 73 00 	sts	0x0073, r1
+    TWI_TxTail = 0;
+ 1d8:	10 92 60 00 	sts	0x0060, r1
+    TWI_TxHead = 0;
+ 1dc:	10 92 61 00 	sts	0x0061, r1
+ 1e0:	08 95       	ret
+
+000001e2 <i2cSInitialize>:
+
+/*
+ * Initialise USI for TWI Slave mode.
+ */
+void i2cSInitialize( unsigned char TWI_ownAddress )
+{
+ 1e2:	cf 93       	push	r28
+ 1e4:	df 93       	push	r29
+ 1e6:	1f 92       	push	r1
+ 1e8:	cd b7       	in	r28, 0x3d	; 61
+ 1ea:	de b7       	in	r29, 0x3e	; 62
+  sei();
+ 1ec:	78 94       	sei
+
+  i2cSFlushBuffers();
+ 1ee:	89 83       	std	Y+1, r24	; 0x01
+ 1f0:	ef df       	rcall	.-34     	; 0x1d0 <i2cSFlushBuffers>
+
+  TWI_slaveAddress = TWI_ownAddress;
+ 1f2:	89 81       	ldd	r24, Y+1	; 0x01
+ 1f4:	80 93 85 00 	sts	0x0085, r24
+
+  PORT_USI |=  (1<<PORT_USI_SCL);                                 // Set SCL high
+ 1f8:	c2 9a       	sbi	0x18, 2	; 24
+  PORT_USI |=  (1<<PORT_USI_SDA);                                 // Set SDA high
+ 1fa:	c0 9a       	sbi	0x18, 0	; 24
+  DDR_USI  |=  (1<<PORT_USI_SCL);                                 // Set SCL as output
+ 1fc:	ba 9a       	sbi	0x17, 2	; 23
+  DDR_USI  &= ~(1<<PORT_USI_SDA);                                 // Set SDA as input
+ 1fe:	b8 98       	cbi	0x17, 0	; 23
+  USICR    =  (1<<USISIE)|(0<<USIOIE)|                            // Enable Start Condition Interrupt. Disable Overflow Interrupt.
+ 200:	88 ea       	ldi	r24, 0xA8	; 168
+ 202:	8d b9       	out	0x0d, r24	; 13
+              (1<<USIWM1)|(0<<USIWM0)|                            // Set USI in Two-wire mode. No USI Counter overflow prior
+                                                                  // to first Start Condition (potentail failure)
+              (1<<USICS1)|(0<<USICS0)|(0<<USICLK)|                // Shift Register Clock Source = External, positive edge
+              (0<<USITC);
+  USISR    = 0xF0;                                                // Clear all flags and reset overflow counter
+ 204:	80 ef       	ldi	r24, 0xF0	; 240
+ 206:	8e b9       	out	0x0e, r24	; 14
+}
+ 208:	0f 90       	pop	r0
+ 20a:	df 91       	pop	r29
+ 20c:	cf 91       	pop	r28
+ 20e:	08 95       	ret
+
+00000210 <i2cSTransmitByte>:
+*/
+void i2cSTransmitByte( unsigned char data )
+{
+    unsigned char tmphead;
+
+    tmphead = ( TWI_TxHead + 1 ) & TWI_TX_BUFFER_MASK;         // Calculate buffer index.
+ 210:	90 91 61 00 	lds	r25, 0x0061
+ 214:	9f 5f       	subi	r25, 0xFF	; 255
+ 216:	9f 70       	andi	r25, 0x0F	; 15
+    while ( tmphead == TWI_TxTail );                           // Wait for free space in buffer.
+ 218:	20 91 60 00 	lds	r18, 0x0060
+ 21c:	92 17       	cp	r25, r18
+ 21e:	e1 f3       	breq	.-8      	; 0x218 <i2cSTransmitByte+0x8>
+    TWI_TxBuf[tmphead] = data;                                 // Store data in buffer.
+ 220:	e9 2f       	mov	r30, r25
+ 222:	f0 e0       	ldi	r31, 0x00	; 0
+ 224:	ee 59       	subi	r30, 0x9E	; 158
+ 226:	ff 4f       	sbci	r31, 0xFF	; 255
+ 228:	80 83       	st	Z, r24
+    TWI_TxHead = tmphead;                                      // Store new index.
+ 22a:	90 93 61 00 	sts	0x0061, r25
+ 22e:	08 95       	ret
+
+00000230 <i2cSReceiveByte>:
+ */
+unsigned char i2cSReceiveByte( void )
+{
+    unsigned char tmptail;
+    unsigned char tmpRxTail;                                  // Temporary variable to store volatile
+    tmpRxTail = TWI_RxTail;                                   // Not necessary, but prevents warnings
+ 230:	80 91 72 00 	lds	r24, 0x0072
+    while ( TWI_RxHead == tmpRxTail );
+ 234:	90 91 73 00 	lds	r25, 0x0073
+ 238:	98 17       	cp	r25, r24
+ 23a:	e1 f3       	breq	.-8      	; 0x234 <i2cSReceiveByte+0x4>
+    tmptail = ( TWI_RxTail + 1 ) & TWI_RX_BUFFER_MASK;        // Calculate buffer index
+ 23c:	e0 91 72 00 	lds	r30, 0x0072
+ 240:	ef 5f       	subi	r30, 0xFF	; 255
+ 242:	ef 70       	andi	r30, 0x0F	; 15
+    TWI_RxTail = tmptail;                                     // Store new index
+ 244:	e0 93 72 00 	sts	0x0072, r30
+    return TWI_RxBuf[tmptail];                                // Return data from the buffer.
+ 248:	f0 e0       	ldi	r31, 0x00	; 0
+ 24a:	ec 58       	subi	r30, 0x8C	; 140
+ 24c:	ff 4f       	sbci	r31, 0xFF	; 255
+}
+ 24e:	80 81       	ld	r24, Z
+ 250:	08 95       	ret
+
+00000252 <i2cSCheckBufferNonempty>:
+/*  Check if there is data in the receive buffer.
+ */
+unsigned char i2cSCheckBufferNonempty( void )
+{
+    unsigned char tmpRxTail;                            // Temporary variable to store volatile
+    tmpRxTail = TWI_RxTail;                             // Not necessary, but prevents warnings
+ 252:	90 91 72 00 	lds	r25, 0x0072
+    return ( TWI_RxHead != tmpRxTail );                 // Return 0 (FALSE) if the receive buffer is empty.
+ 256:	20 91 73 00 	lds	r18, 0x0073
+ 25a:	81 e0       	ldi	r24, 0x01	; 1
+ 25c:	29 13       	cpse	r18, r25
+ 25e:	01 c0       	rjmp	.+2      	; 0x262 <__stack+0x3>
+ 260:	80 e0       	ldi	r24, 0x00	; 0
+}
+ 262:	08 95       	ret
+
+00000264 <__vector_13>:
+ * Detects the USI_TWI Start Condition and intialises the USI
+ * for reception of the "TWI Address" packet.
+ */
+
+ISR(USI_START_VECTOR)
+{
+ 264:	1f 92       	push	r1
+ 266:	0f 92       	push	r0
+ 268:	0f b6       	in	r0, 0x3f	; 63
+ 26a:	0f 92       	push	r0
+ 26c:	11 24       	eor	r1, r1
+ 26e:	8f 93       	push	r24
+    unsigned char tmpUSISR;                                         // Temporary variable to store volatile
+    tmpUSISR = USISR;                                               // Not necessary, but prevents warnings
+ 270:	8e b1       	in	r24, 0x0e	; 14
+    // Set default starting conditions for new TWI package
+    USI_TWI_Overflow_State = USI_SLAVE_CHECK_ADDRESS;
+ 272:	10 92 84 00 	sts	0x0084, r1
+    DDR_USI  &= ~(1<<PORT_USI_SDA);                                 // Set SDA as input
+ 276:	b8 98       	cbi	0x17, 0	; 23
+    while ( (PIN_USI & (1<<PORT_USI_SCL)) & !(tmpUSISR & (1<<USIPF)) );   // Wait for SCL to go low to ensure the "Start Condition" has completed.
+ 278:	86 b3       	in	r24, 0x16	; 22
+                                                                          // If a Stop condition arises then leave the interrupt to prevent waiting forever.
+
+    USICR   =   (1<<USISIE)|(1<<USIOIE)|                            // Enable Overflow and Start Condition Interrupt. (Keep StartCondInt to detect RESTART)
+ 27a:	88 ef       	ldi	r24, 0xF8	; 248
+ 27c:	8d b9       	out	0x0d, r24	; 13
+                (1<<USIWM1)|(1<<USIWM0)|                            // Set USI in Two-wire mode.
+                (1<<USICS1)|(0<<USICS0)|(0<<USICLK)|                // Shift Register Clock Source = External, positive edge
+                (0<<USITC);
+    USISR  =    (1<<USI_START_COND_INT)|(1<<USIOIF)|(1<<USIPF)|(1<<USIDC)|      // Clear flags
+ 27e:	80 ef       	ldi	r24, 0xF0	; 240
+ 280:	8e b9       	out	0x0e, r24	; 14
+                (0x0<<USICNT0);                                     // Set USI to sample 8 bits i.e. count 16 external pin toggles.
+    
+}
+ 282:	8f 91       	pop	r24
+ 284:	0f 90       	pop	r0
+ 286:	0f be       	out	0x3f, r0	; 63
+ 288:	0f 90       	pop	r0
+ 28a:	1f 90       	pop	r1
+ 28c:	18 95       	reti
+
+0000028e <__vector_14>:
+ * Handels all the comunication. Is disabled only when waiting
+ * for new Start Condition.
+ */
+
+ISR(USI_OVERFLOW_VECTOR)
+{
+ 28e:	1f 92       	push	r1
+ 290:	0f 92       	push	r0
+ 292:	0f b6       	in	r0, 0x3f	; 63
+ 294:	0f 92       	push	r0
+ 296:	11 24       	eor	r1, r1
+ 298:	8f 93       	push	r24
+ 29a:	9f 93       	push	r25
+ 29c:	ef 93       	push	r30
+ 29e:	ff 93       	push	r31
+  unsigned char tmpTxTail;     // Temporary variables to store volatiles
+  unsigned char tmpUSIDR;
+
+
+  switch (USI_TWI_Overflow_State)
+ 2a0:	80 91 84 00 	lds	r24, 0x0084
+ 2a4:	82 30       	cpi	r24, 0x02	; 2
+ 2a6:	09 f4       	brne	.+2      	; 0x2aa <__vector_14+0x1c>
+ 2a8:	46 c0       	rjmp	.+140    	; 0x336 <__vector_14+0xa8>
+ 2aa:	28 f4       	brcc	.+10     	; 0x2b6 <__vector_14+0x28>
+ 2ac:	88 23       	and	r24, r24
+ 2ae:	c1 f0       	breq	.+48     	; 0x2e0 <__vector_14+0x52>
+ 2b0:	81 30       	cpi	r24, 0x01	; 1
+ 2b2:	31 f1       	breq	.+76     	; 0x300 <__vector_14+0x72>
+ 2b4:	53 c0       	rjmp	.+166    	; 0x35c <__vector_14+0xce>
+ 2b6:	84 30       	cpi	r24, 0x04	; 4
+ 2b8:	09 f4       	brne	.+2      	; 0x2bc <__vector_14+0x2e>
+ 2ba:	43 c0       	rjmp	.+134    	; 0x342 <__vector_14+0xb4>
+ 2bc:	f0 f0       	brcs	.+60     	; 0x2fa <__vector_14+0x6c>
+ 2be:	85 30       	cpi	r24, 0x05	; 5
+ 2c0:	09 f0       	breq	.+2      	; 0x2c4 <__vector_14+0x36>
+ 2c2:	4c c0       	rjmp	.+152    	; 0x35c <__vector_14+0xce>
+      break;
+
+    // Copy data from USIDR and send ACK. Next USI_SLAVE_REQUEST_DATA
+    case USI_SLAVE_GET_DATA_AND_SEND_ACK:
+      // Put data into Buffer
+      tmpUSIDR = USIDR;             // Not necessary, but prevents warnings
+ 2c4:	9f b1       	in	r25, 0x0f	; 15
+      TWI_RxHead = ( TWI_RxHead + 1 ) & TWI_RX_BUFFER_MASK;
+ 2c6:	80 91 73 00 	lds	r24, 0x0073
+ 2ca:	8f 5f       	subi	r24, 0xFF	; 255
+ 2cc:	8f 70       	andi	r24, 0x0F	; 15
+ 2ce:	80 93 73 00 	sts	0x0073, r24
+      TWI_RxBuf[TWI_RxHead] = tmpUSIDR;
+ 2d2:	e0 91 73 00 	lds	r30, 0x0073
+ 2d6:	f0 e0       	ldi	r31, 0x00	; 0
+ 2d8:	ec 58       	subi	r30, 0x8C	; 140
+ 2da:	ff 4f       	sbci	r31, 0xFF	; 255
+ 2dc:	90 83       	st	Z, r25
+ 2de:	37 c0       	rjmp	.+110    	; 0x34e <__vector_14+0xc0>
+  switch (USI_TWI_Overflow_State)
+  {
+    // ---------- Address mode ----------
+    // Check address and send ACK (and next USI_SLAVE_SEND_DATA) if OK, else reset USI.
+    case USI_SLAVE_CHECK_ADDRESS:
+      if ((USIDR == 0) || (( USIDR>>1 ) == TWI_slaveAddress))
+ 2e0:	8f b1       	in	r24, 0x0f	; 15
+ 2e2:	88 23       	and	r24, r24
+ 2e4:	31 f0       	breq	.+12     	; 0x2f2 <__vector_14+0x64>
+ 2e6:	8f b1       	in	r24, 0x0f	; 15
+ 2e8:	86 95       	lsr	r24
+ 2ea:	90 91 85 00 	lds	r25, 0x0085
+ 2ee:	89 13       	cpse	r24, r25
+ 2f0:	1f c0       	rjmp	.+62     	; 0x330 <__vector_14+0xa2>
+      {
+        if ( USIDR & 0x01 )
+ 2f2:	78 9b       	sbis	0x0f, 0	; 15
+ 2f4:	2c c0       	rjmp	.+88     	; 0x34e <__vector_14+0xc0>
+          USI_TWI_Overflow_State = USI_SLAVE_SEND_DATA;
+ 2f6:	81 e0       	ldi	r24, 0x01	; 1
+ 2f8:	2b c0       	rjmp	.+86     	; 0x350 <__vector_14+0xc2>
+      break;
+
+    // ----- Master write data mode ------
+    // Check reply and goto USI_SLAVE_SEND_DATA if OK, else reset USI.
+    case USI_SLAVE_CHECK_REPLY_FROM_SEND_DATA:
+      if ( USIDR ) // If NACK, the master does not want more data.
+ 2fa:	8f b1       	in	r24, 0x0f	; 15
+ 2fc:	81 11       	cpse	r24, r1
+ 2fe:	18 c0       	rjmp	.+48     	; 0x330 <__vector_14+0xa2>
+
+    // Copy data from buffer to USIDR and set USI to shift byte. Next USI_SLAVE_REQUEST_REPLY_FROM_SEND_DATA
+    case USI_SLAVE_SEND_DATA:
+
+      // Get data from Buffer
+      tmpTxTail = TWI_TxTail;           // Not necessary, but prevents warnings
+ 300:	80 91 60 00 	lds	r24, 0x0060
+      if ( TWI_TxHead != tmpTxTail )
+ 304:	90 91 61 00 	lds	r25, 0x0061
+ 308:	98 17       	cp	r25, r24
+ 30a:	91 f0       	breq	.+36     	; 0x330 <__vector_14+0xa2>
+      {
+        TWI_TxTail = ( TWI_TxTail + 1 ) & TWI_TX_BUFFER_MASK;
+ 30c:	80 91 60 00 	lds	r24, 0x0060
+ 310:	8f 5f       	subi	r24, 0xFF	; 255
+ 312:	8f 70       	andi	r24, 0x0F	; 15
+ 314:	80 93 60 00 	sts	0x0060, r24
+        USIDR = TWI_TxBuf[TWI_TxTail];
+ 318:	e0 91 60 00 	lds	r30, 0x0060
+ 31c:	f0 e0       	ldi	r31, 0x00	; 0
+ 31e:	ee 59       	subi	r30, 0x9E	; 158
+ 320:	ff 4f       	sbci	r31, 0xFF	; 255
+ 322:	80 81       	ld	r24, Z
+ 324:	8f b9       	out	0x0f, r24	; 15
+      else // If the buffer is empty then:
+      {
+          SET_USI_TO_TWI_START_CONDITION_MODE();
+          return;
+      }
+      USI_TWI_Overflow_State = USI_SLAVE_REQUEST_REPLY_FROM_SEND_DATA;
+ 326:	82 e0       	ldi	r24, 0x02	; 2
+ 328:	80 93 84 00 	sts	0x0084, r24
+      SET_USI_TO_SEND_DATA();
+ 32c:	b8 9a       	sbi	0x17, 0	; 23
+ 32e:	0d c0       	rjmp	.+26     	; 0x34a <__vector_14+0xbc>
+        TWI_TxTail = ( TWI_TxTail + 1 ) & TWI_TX_BUFFER_MASK;
+        USIDR = TWI_TxBuf[TWI_TxTail];
+      }
+      else // If the buffer is empty then:
+      {
+          SET_USI_TO_TWI_START_CONDITION_MODE();
+ 330:	88 ea       	ldi	r24, 0xA8	; 168
+ 332:	8d b9       	out	0x0d, r24	; 13
+ 334:	0a c0       	rjmp	.+20     	; 0x34a <__vector_14+0xbc>
+      SET_USI_TO_SEND_DATA();
+      break;
+
+    // Set USI to sample reply from master. Next USI_SLAVE_CHECK_REPLY_FROM_SEND_DATA
+    case USI_SLAVE_REQUEST_REPLY_FROM_SEND_DATA:
+      USI_TWI_Overflow_State = USI_SLAVE_CHECK_REPLY_FROM_SEND_DATA;
+ 336:	83 e0       	ldi	r24, 0x03	; 3
+ 338:	80 93 84 00 	sts	0x0084, r24
+      SET_USI_TO_READ_ACK();
+ 33c:	b8 98       	cbi	0x17, 0	; 23
+ 33e:	1f b8       	out	0x0f, r1	; 15
+ 340:	0b c0       	rjmp	.+22     	; 0x358 <__vector_14+0xca>
+      break;
+
+    // ----- Master read data mode ------
+    // Set USI to sample data from master. Next USI_SLAVE_GET_DATA_AND_SEND_ACK.
+    case USI_SLAVE_REQUEST_DATA:
+      USI_TWI_Overflow_State = USI_SLAVE_GET_DATA_AND_SEND_ACK;
+ 342:	85 e0       	ldi	r24, 0x05	; 5
+ 344:	80 93 84 00 	sts	0x0084, r24
+      SET_USI_TO_READ_DATA();
+ 348:	b8 98       	cbi	0x17, 0	; 23
+ 34a:	80 e7       	ldi	r24, 0x70	; 112
+ 34c:	06 c0       	rjmp	.+12     	; 0x35a <__vector_14+0xcc>
+      // Put data into Buffer
+      tmpUSIDR = USIDR;             // Not necessary, but prevents warnings
+      TWI_RxHead = ( TWI_RxHead + 1 ) & TWI_RX_BUFFER_MASK;
+      TWI_RxBuf[TWI_RxHead] = tmpUSIDR;
+
+      USI_TWI_Overflow_State = USI_SLAVE_REQUEST_DATA;
+ 34e:	84 e0       	ldi	r24, 0x04	; 4
+ 350:	80 93 84 00 	sts	0x0084, r24
+      SET_USI_TO_SEND_ACK();
+ 354:	1f b8       	out	0x0f, r1	; 15
+ 356:	b8 9a       	sbi	0x17, 0	; 23
+ 358:	8e e7       	ldi	r24, 0x7E	; 126
+ 35a:	8e b9       	out	0x0e, r24	; 14
+      break;
+  }
+}
+ 35c:	ff 91       	pop	r31
+ 35e:	ef 91       	pop	r30
+ 360:	9f 91       	pop	r25
+ 362:	8f 91       	pop	r24
+ 364:	0f 90       	pop	r0
+ 366:	0f be       	out	0x3f, r0	; 63
+ 368:	0f 90       	pop	r0
+ 36a:	1f 90       	pop	r1
+ 36c:	18 95       	reti
+
+0000036e <main>:
+
+int main()
+{
+ 36e:	cf 93       	push	r28
+ 370:	df 93       	push	r29
+ 372:	00 d0       	rcall	.+0      	; 0x374 <main+0x6>
+ 374:	00 d0       	rcall	.+0      	; 0x376 <main+0x8>
+ 376:	cd b7       	in	r28, 0x3d	; 61
+ 378:	de b7       	in	r29, 0x3e	; 62
+	//Enable LEDs for display - not part of i2c protocol
+	DDRB |= (1<<green) | (1<<red);
+ 37a:	87 b3       	in	r24, 0x17	; 23
+ 37c:	88 61       	ori	r24, 0x18	; 24
+ 37e:	87 bb       	out	0x17, r24	; 23
+
+	//Initialize master
+	i2cMInitialize();
+ 380:	a0 de       	rcall	.-704    	; 0xc2 <i2cMInitialize>
+	unsigned char slaveAddress = 0b1110000;
+
+	//Message to transmit starts with address to transmit to and write bit
+	//Second byte is the byte being transmitted
+	unsigned char messageWrite[2];
+	messageWrite[0] = slaveAddress<<1 | 0;
+ 382:	80 ee       	ldi	r24, 0xE0	; 224
+ 384:	8b 83       	std	Y+3, r24	; 0x03
+	messageWrite[1] = 0x88;
+ 386:	88 e8       	ldi	r24, 0x88	; 136
+ 388:	8c 83       	std	Y+4, r24	; 0x04
+
+	//Send (keep trying until successful - slave may not be ready the first time)
+	unsigned char fail = 1;
+	while(fail)
+	{
+		fail = !i2cMTransceive(messageWrite, 2);
+ 38a:	62 e0       	ldi	r22, 0x02	; 2
+ 38c:	ce 01       	movw	r24, r28
+ 38e:	03 96       	adiw	r24, 0x03	; 3
+ 390:	c9 de       	rcall	.-622    	; 0x124 <i2cMTransceive>
+	messageWrite[0] = slaveAddress<<1 | 0;
+	messageWrite[1] = 0x88;
+
+	//Send (keep trying until successful - slave may not be ready the first time)
+	unsigned char fail = 1;
+	while(fail)
+ 392:	88 23       	and	r24, r24
+ 394:	d1 f3       	breq	.-12     	; 0x38a <main+0x1c>
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+ 396:	2f ef       	ldi	r18, 0xFF	; 255
+ 398:	84 e3       	ldi	r24, 0x34	; 52
+ 39a:	9c e0       	ldi	r25, 0x0C	; 12
+ 39c:	21 50       	subi	r18, 0x01	; 1
+ 39e:	80 40       	sbci	r24, 0x00	; 0
+ 3a0:	90 40       	sbci	r25, 0x00	; 0
+ 3a2:	e1 f7       	brne	.-8      	; 0x39c <main+0x2e>
+ 3a4:	00 c0       	rjmp	.+0      	; 0x3a6 <main+0x38>
+ 3a6:	00 00       	nop
+	_delay_ms(4000);
+
+	//Message to read data back starts with slave address and read bit
+	//Second byte will store said data
+	unsigned char messageRead[2];
+	messageRead[0] = slaveAddress<<1 | 1;
+ 3a8:	81 ee       	ldi	r24, 0xE1	; 225
+ 3aa:	89 83       	std	Y+1, r24	; 0x01
+
+	//Send and read
+	i2cMTransceive(messageRead, 2);
+ 3ac:	62 e0       	ldi	r22, 0x02	; 2
+ 3ae:	ce 01       	movw	r24, r28
+ 3b0:	01 96       	adiw	r24, 0x01	; 1
+ 3b2:	b8 de       	rcall	.-656    	; 0x124 <i2cMTransceive>
+
+	//Byte gotten back is now in messageRead[1].
+	unsigned char response = messageRead[1];
+	displayByte(response);
+ 3b4:	8a 81       	ldd	r24, Y+2	; 0x02
+ 3b6:	56 de       	rcall	.-852    	; 0x64 <displayByte>
+ 3b8:	ff cf       	rjmp	.-2      	; 0x3b8 <main+0x4a>
+
+000003ba <_exit>:
+ 3ba:	f8 94       	cli
+
+000003bc <__stop_program>:
+ 3bc:	ff cf       	rjmp	.-2      	; 0x3bc <__stop_program>
