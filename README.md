@@ -22,6 +22,10 @@ In parallel with the electronics, I created a few iterations of the deck. I cons
 
 I also learned how to use a few CAD packages, and CNC equipment to make the mounting hardware for the motors. Learning from the flimsy construction of the MarkI motor mounts I designed my own longboard trucks to accommodate the installation of a pair of 2250Watt motors. My designs were based on the Caliber II Longboard trucks.
 
+As it stands, just about everything made in the past year needs to be reiterated.
 
-Today: As it stands, just about everything made in the past year needs to be reiterated.
-Over the past week I've redesigned the motor mounts, deck, and battery pack.
+My main focus now, is to involve more people. My friend Anton Zaytsev has been diligently helping me create a 1.5kW charger and another offered to do some of the software. However, I think this project can bring together a serious community interested in progressing high-tech DIY electrical vehicles.
+
+
+
+
