@@ -1,0 +1,526 @@
+dim swApp
+dim storePath
+dim docVisible
+#If VBA7 Then
+Private Type BROWSEINFO
+   hwndOwner       As LongPtr
+   pIDLRoot        As Long
+   pszDisplayName  As String
+   lpszTitle       As String
+   ulFlags         As Long
+   lpfnCallback    As LongPtr
+   lParam          As LongPtr
+  iImage          As Long
+End Type
+Private Declare PtrSafe Function SHBrowseForFolder Lib "Shell32" (lpbi As BROWSEINFO) As Long
+Private Declare PtrSafe Function SHGetPathFromIDList Lib "Shell32" (ByVal pidList As Long, ByVal lpBuffer As String) As Long
+Private Declare PtrSafe Sub CoTaskMemFree Lib "ole32" (ByVal hMem As Long)
+#Else
+Private Type BROWSEINFO
+   hwndOwner       As Long
+   pIDLRoot        As Long
+   pszDisplayName  As Long
+   lpszTitle       As String
+   ulFlags         As Long
+   lpfnCallback    As Long
+   lParam          As Long
+  iImage          As Long
+End Type
+Private Declare Function SHBrowseForFolder Lib "Shell32" (lpbi As BROWSEINFO) As Long
+Private Declare Function SHGetPathFromIDList Lib "Shell32" (ByVal pidList As Long, ByVal lpBuffer As String) As Long
+Private Declare Sub CoTaskMemFree Lib "ole32" (ByVal hMem As Long)
+#End If
+Private Const MAX_PATH = 260
+'Directories only
+Private Const BIF_RETURNONLYFSDIRS = &H1&
+'Windows 2000 (Shell32.dll 5.0) extended dialog
+Private Const BIF_NEWDIALOGSTYLE = &H40
+' show edit box
+Private Const BIF_EDITBOX = &H10&
+Function getLastFeatureByType(model,typ)  
+  Set feat = model.FirstFeature ' Get the 1st feature in part
+  Set res = Nothing
+  Count = 0
+  Do While Not feat Is Nothing ' While we have a valid feature
+    If feat.GetTypeName() = typ Then
+      Set res = feat
+    End If
+    Set feat = feat.GetNextFeature() ' Get the next feature
+  Loop ' Continue until no more
+  Set getLastFeatureByType = res
+End Function
+' this code with copy a matrix to a other
+Function copyMat4x4(source)
+Dim res(0 To 15) As Double
+For i = 0 To 15
+ res(i) = source(i)
+Next
+copyMat4x4 = res
+End Function
+
+' This code creates a mat from a sw mat
+Function createMatFromSWMat(source)
+ Dim res(0 To 15) As Double
+ res(0) = source(0)
+ res(1) = source(1)
+ res(2) = source(2)
+ res(3) = 0
+ res(4) = source(3)
+ res(5) = source(4)
+ res(6) = source(5)
+ res(7) = 0
+ res(8) = source(6)
+ res(9) = source(7)
+ res(10) = source(8)
+ res(11) = 0
+ res(12) = source(9)
+ res(13) = source(10)
+ res(14) = source(11)
+ res(15) = source(12)
+ createMatFromSWMat = res
+End Function
+Function createSWMatFromMat(source)
+ Dim res(0 To 15) As Double
+ res(0) = source(0)
+ res(1) = source(1)
+ res(2) = source(2)
+ res(3) = source(4)
+ res(4) = source(5)
+ res(5) = source(6)
+ res(6) = source(8)
+ res(7) = source(9)
+ res(8) = source(10)
+ res(9) = source(12)
+ res(10) = source(13)
+ res(11) = source(14)
+ res(12) = source(15)
+ res(13) = 0
+ res(14) = 0
+ res(15) = 0
+ createSWMatFromMat = res
+End Function
+Function createMat4x4FromValues(x1,x2,x3,y1,y2,y3,z1,z2,z3,t1,t2,t3)
+ Dim res(0 To 15) As Double
+ res(0) = x1
+ res(1) = x2
+ res(2) = x3
+ res(3) = 0
+ res(4) = y1
+ res(5) = y2
+ res(6) = y3
+ res(7) = 0
+ res(8) = z1
+ res(9) = z2
+ res(10) =z3
+ res(11) = 0
+ res(12) = t1
+ res(13) = t2
+ res(14) = t3
+ res(15) = 1
+ createMat4x4FromValues = res
+End Function
+' this code will mult a common mat with any other stuff
+Function multMatMat(ld, xld, yld, rd, xrd, yrd)
+  mulRes = yld * xrd
+  'Dim od(0 To 0) As Variant
+  ReDim od(mulRes - 1) As Double
+  For i = 0 To mulRes - 1
+   od(i) = 0#
+  Next
+  y = 0
+  While y < yld
+    x = 0
+    While x < xrd
+      i = 0
+      While i < xld
+       od(x * yld + y) = od(x * yld + y) + ld(i * yld + y) * rd(x * yrd + i)
+       i = i + 1
+      Wend
+      x = x + 1
+    Wend
+    y = y + 1
+  Wend
+  multMatMat = od
+
+End Function
+' this code will mult a vector with a matrix
+Function mulMat4x4Values3d(mat, x,y,z)
+  tmp = createVec4d(x, y, z, 1)
+  res = multMatMat(mat, 4, 4, tmp, 1, 3)
+  mulMat4x4Values3d = createVec3d(res(0), res(1), res(2))
+End Function
+Function mulMat4x4Vec3d(mat, vec)
+  tmp = createVec4d(vec(0), vec(1), vec(2), 1)
+  res = multMatMat(mat, 4, 4, tmp, 1, 3)
+  mulMat4x4Vec3d = createVec3d(res(0), res(1), res(2))
+End Function
+Function mulMat4x4Mat4x4(mat1, mat2)
+  mulMat4x4Mat4x4 = multMatMat(mat1, 4, 4, mat2, 4, 4)
+End Function
+' create a 4x4 matrix
+Function createMat4x4()
+ Dim res(0 To 15) As Double
+ for i = 0 to 15 
+ res(i) = 0
+ next
+ createMat4x4 = res
+End Function
+Function createMat4x4Ident()
+ Dim res(0 To 15) As Double
+ res(0) = 1
+ res(5) = 1
+ res(10) = 1
+ res(15) = 1
+ res(1) = 0
+ res(2) = 0
+ res(3) = 0
+ res(4) = 0
+ res(6) = 0
+ res(7) = 0
+ res(8) = 0
+ res(9) = 0
+ res(11) = 0
+ res(12) = 0
+ res(13) = 0
+ res(14) = 0
+ createMat4x4Ident = res
+End Function
+' this function create a new vector
+Function createVec3d(x, y, z)
+ Dim res(0 To 2) As Double
+ res(0) = x
+ res(1) = y
+ res(2) = z
+ createVec3d = res
+End Function
+' this function create a new vector
+Function createVec4d(x, y, z, w)
+ Dim res(0 To 3) As Double
+ res(0) = x
+ res(1) = y
+ res(2) = z
+ res(3) = w
+ createVec4d = res
+End Function
+
+Function getMatTVec(mat)
+ getMatTVec = createVec3d(mat(12), mat(13), mat(14))
+End Function
+
+Sub setMatTVec(mat, v)
+ mat(12) = v(0)
+ mat(13) = v(1)
+ mat(14) = v(2)
+End Sub
+Sub setMatXVec(mat, v)
+ mat(0) = v(0)
+ mat(1) = v(1)
+ mat(2) = v(2)
+End Sub
+Sub setMatYVec(mat, v)
+ mat(4) = v(0)
+ mat(5) = v(1)
+ mat(6) = v(2)
+End Sub
+Sub setMatZVec(mat, v)
+ mat(8) = v(0)
+ mat(9) = v(1)
+ mat(10) = v(2)
+End Sub
+Sub setMatScale(mat, s)
+ mat(15) = s
+End Sub
+Function getMatXVec(mat)
+ getMatXVec = createVec3d(mat(0), mat(1), mat(2))
+End Function
+Function getMatYVec(mat)
+ getMatYVec = createVec3d(mat(4), mat(5), mat(6))
+End Function
+Function getMatZVec(mat)
+ getMatZVec = createVec3d(mat(8), mat(9), mat(10))
+End Function
+
+Function negVec3d(v)
+ negVec3d = createVec3d(-v(0), -v(1), -v(2))
+End Function
+Function scaleVec3d(v,s)
+ scaleVec3d = createVec3d(v(0)*s,v(1)*s,v(2)*s)
+End Function
+' invert a 4x4 matrix
+Function invMat4x4(source)
+target = copyMat4x4(source)
+setMatTVec target, createVec3d(0, 0, 0)
+ target(1) = source(4)
+ target(4) = source(1)
+ target(2) = source(8)
+ target(8) = source(2)
+ target(6) = source(9)
+ target(9) = source(6)
+ setMatScale target,1
+ t = getMatTVec(source)
+ v = mulMat4x4Vec3d(target, t)
+ setMatTVec target, negVec3d(v)
+ invMat4x4 = target
+End Function
+Function getFaceFromModel(part, pos, normal)
+ Dim partBodies As Variant
+ partBodies = part.GetBodies(swSolidBody)
+ For k = LBound(partBodies) To UBound(partBodies)
+   found = 0
+   Dim body As Object
+   Set body = partBodies(k)
+   Set face = body.GetFirstFace()
+   getFaceFromModel = noting
+   Do While Not face Is Nothing ' While we have a valid feature
+     Set sur = face.GetSurface()
+     If sur.IsPlane() Then
+       planePara = sur.PlaneParams
+       faceNormal = face.normal
+       nTest = faceNormal(0) * normal(0) + faceNormal(1) * normal(1) + faceNormal(2) * normal(2)
+       If nTest > 1 - 0.000001 Then
+         ' check projection
+         closeRes = face.GetClosestPointOn(pos(0), pos(1), pos(2))
+         dTest = (pos(0) - closeRes(0)) * (pos(0) - closeRes(0)) + (pos(1) - closeRes(1)) * (pos(1) - closeRes(1)) + (pos(2) - closeRes(2)) * (pos(2) - closeRes(2))
+         If dTest < 0.000001 Then
+           Set getFaceFromModel = face
+           found=1
+           Exit Do
+         End If
+       End If
+     else
+       If sur.IsCylinder() then
+         closeRes = face.GetClosestPointOn(pos(0), pos(1), pos(2))
+         dTest = (pos(0) - closeRes(0)) * (pos(0) - closeRes(0)) + (pos(1) - closeRes(1)) * (pos(1) - closeRes(1)) + (pos(2) - closeRes(2)) * (pos(2) - closeRes(2))
+         If dTest < 0.00000001 Then
+           res=sur.EvaluateAtPoint(closeRes(0),closeRes(1),closeRes(2))
+           nTest=res(0)*normal(0)+res(1)*normal(1)+res(2)*normal(2)
+           if nTest>1-0.00000001 then
+             Set getFaceFromModel = face
+             found=1
+             Exit Do
+           End if
+         End if
+       End if
+     End if
+     Set face = face.GetNextFace ' Get the next Face
+   Loop
+   If (found = 1) Then
+     Exit For
+   End If
+ Next k
+End Function
+Function getEdgeFromModel(part, pos,byref edgeRet)
+ Dim partBodies As Variant
+ partBodies = part.GetBodies(swSolidBody)
+ For k = LBound(partBodies) To UBound(partBodies)
+   Dim body As Object
+   Set body = partBodies(k)
+   edges= body.GetEdges()
+   start= LBound(edges)
+   ende = UBound(edges)
+   For i = start To ende
+     Set edge = edges(i)
+     closeRes=edge.GetClosestPointOn(pos(0),pos(1),pos(2))
+     dTest = (pos(0) - closeRes(0)) * (pos(0) - closeRes(0)) + (pos(1) - closeRes(1)) * (pos(1) - closeRes(1)) + (pos(2) - closeRes(2)) * (pos(2) - closeRes(2))
+     If dTest < 0.00000001 Then
+       set edgeRet=edge
+       getEdgeFromModel=true
+       exit function
+     End If
+   Next i
+ Next k
+ getEdgeFromModel=false
+End Function
+sub cLn(part,wMat,x1,y1,x2,y2)
+pk1=mulMat4x4Values3d(wMat,x1,y1,0)
+pk2=mulMat4x4Values3d(wMat,x2,y2,0)
+Part.SketchManager.CreateLine pk1(0),pk1(1),0,pk2(0),pk2(1),0
+end sub
+sub cCLn(part,wMat,x1,y1,x2,y2)
+pk1=mulMat4x4Values3d(wMat,x1,y1,0)
+pk2=mulMat4x4Values3d(wMat,x2,y2,0)
+Part.CreateCenterLineVB pk1(0),pk1(1),0,pk2(0),pk2(1),0
+end sub
+sub cArc(part,wMat,x1,y1,x2,y2,x3,y3)
+pk1=mulMat4x4Values3d(wMat,x1,y1,0)
+pk2=mulMat4x4Values3d(wMat,x2,y2,0)
+pk3=mulMat4x4Values3d(wMat,x3,y3,0)
+Part.SketchManager.Create3PointArc pk1(0),pk1(1),0,pk3(0),pk3(1),0,pk2(0),pk2(1),0
+end sub
+sub cCir(part,wMat,x1,y1,rad)
+pk1=mulMat4x4Values3d(wMat,x1,y1,0)
+Part.SketchManager.CreateCircleByRadius pk1(0),pk1(1),0,rad
+end sub
+Public Function BrowseForFolder() As String
+  Dim tBI         As BROWSEINFO
+  Dim lngPIDL     As Long
+  Dim strPath     As String
+  With tBI
+    .lpszTitle = ""
+    .ulFlags = BIF_RETURNONLYFSDIRS Or BIF_NEWDIALOGSTYLE Or BIF_EDITBOX
+  End With
+  lngPIDL = SHBrowseForFolder(tBI)
+  If (lngPIDL <> 0) Then
+    ' get path from ID list
+    strPath = Space$(MAX_PATH)
+    SHGetPathFromIDList lngPIDL, strPath
+    strPath = Left$(strPath, InStr(strPath, Chr$(0)) - 1)
+    ' release list
+    CoTaskMemFree lngPIDL
+  End If
+  BrowseForFolder = strPath
+End Function
+Sub CreatePart0
+dim errors as long
+dim warnings as long
+if (docVisible=0) then
+ swApp.DocumentVisible 0, 1
+end if
+set res=swApp.OpenDoc6 ( storePath & "FPSSFJAD-D10-L100-T36-Q8.sldprt",1,3,"", errors, warnings)
+if not res is nothing then
+ if (docVisible=0) then
+  swApp.DocumentVisible 1, 1
+ end if
+ exit sub
+end if
+if (docVisible=0) then
+ swApp.DocumentVisible 1, 1
+end if
+Dim longstatus As Long
+Dim sPartTemplateName As String
+sPartTemplateName = swApp.GetUserPreferenceStringValue(8)
+Set part = swApp.NewDocument(sPartTemplateName, 0, 0, 0)
+swApp.ActivateDoc2 "FPSSFJAD-D10-L100-T36-Q8.sldprt", False, longstatus
+Set part = swApp.ActiveDoc
+part.SketchManager.AddToDB = true
+part.SketchManager.DisplayWhenAdded = false
+part.ActiveView.EnableGraphicsUpdate = false
+Set modelExt = part.Extension
+Set customPropMgr = modelExt.CustomPropertyManager("")
+customPropMgr.Add2 "NN", 30, "FSFJ_ _, FSSFJ_ _, FPSFJ_ _, FPSSFJ_ _, FSFU_ _, FSSFU_ _"
+customPropMgr.Add2 "NT", 30, "Shafts - Shaft Ends Configurable"
+customPropMgr.Add2 "NB", 30, "FPSSFJAD-D10-L100-T36-Q8"
+customPropMgr.Add2 "NBSYN", 30, "$PN."
+customPropMgr.Add2 "LINA", 30, "FPSSFJAD-D10-L100-T36-Q8"
+customPropMgr.Add2 "PN", 30, "FPSSFJAD-D10-L100-T36-Q8"
+customPropMgr.Add2 "TS", 30, "FSFJ_ _, FSSFJ_ _, FPSFJ_ _, FPSSFJ_ _, FSFU_ _, FSSFU_ _"
+customPropMgr.Add2 "DTS", 30, "g6"
+customPropMgr.Add2 "MAT", 30, "440C Stainless Steel Equivalent"
+customPropMgr.Add2 "ST", 30, "Hard Chrome Plating - Plating Hardness: HV750~ Plating Thickness: 5 micron or More"
+customPropMgr.Add2 "LES", 30, "A"
+customPropMgr.Add2 "RES", 30, "D"
+customPropMgr.Add2 "D", 30, "10"
+customPropMgr.Add2 "ALT1", 30, "w/o LKC (L Dimension Tolerance Change)"
+customPropMgr.Add2 "L", 30, "100.0"
+customPropMgr.Add2 "F", 30, "0.0"
+customPropMgr.Add2 "ALT9", 30, "N/A"
+customPropMgr.Add2 "M", 30, "0"
+customPropMgr.Add2 "PMC", 30, "0"
+customPropMgr.Add2 "PMS", 30, "0"
+customPropMgr.Add2 "B", 30, "0"
+customPropMgr.Add2 "T", 30, "36.0"
+customPropMgr.Add2 "ALT10", 30, "N/A"
+customPropMgr.Add2 "N", 30, "0"
+customPropMgr.Add2 "QMC", 30, "0"
+customPropMgr.Add2 "QMS", 30, "0"
+customPropMgr.Add2 "S", 30, "0"
+customPropMgr.Add2 "H", 30, "0"
+customPropMgr.Add2 "U", 30, "0"
+customPropMgr.Add2 "MM", 30, "0.00"
+customPropMgr.Add2 "DD", 30, "0.0"
+customPropMgr.Add2 "P", 30, "0"
+customPropMgr.Add2 "Q", 30, "8"
+customPropMgr.Add2 "R", 30, "0"
+customPropMgr.Add2 "W", 30, "0"
+customPropMgr.Add2 "J", 30, "0"
+customPropMgr.Add2 "Z", 30, "0"
+customPropMgr.Add2 "BB", 30, "0.0"
+customPropMgr.Add2 "LL", 30, "0.0"
+customPropMgr.Add2 "LSC", 30, "0.5"
+customPropMgr.Add2 "LSEC", 30, "0.0"
+customPropMgr.Add2 "RSC", 30, "0.2"
+customPropMgr.Add2 "RSEC", 30, "0.5"
+customPropMgr.Add2 "LSRR", 30, "0.0"
+customPropMgr.Add2 "RSRR", 30, "0.3"
+customPropMgr.Add2 "ALT3", 30, "w/o Wrench Flats"
+customPropMgr.Add2 "SC", 30, "0"
+customPropMgr.Add2 "WSC", 30, "0"
+customPropMgr.Add2 "X", 30, "0"
+customPropMgr.Add2 "LL1", 30, "0"
+customPropMgr.Add2 "WALT3", 30, "0"
+customPropMgr.Add2 "SUPPLIER", 30, "MISUMI"
+customPropMgr.Add2 "ARTICLENO", 30, "FPSSFJAD-D10-L100-T36-Q8"
+customPropMgr.Add2 "BOMINFO", 30, "FPSSFJAD-D10-L100-T36-Q8"
+customPropMgr.Add2 "CREATOR", 30, "CADENAS GmbH"
+customPropMgr.Add2 "IsFastener", 30, "0"
+part.SummaryInfo(0)="FPSSFJAD-D10-L100-T36-Q8"
+part.SummaryInfo(4)="Shafts - Shaft Ends Configurable"
+part.SummaryInfo(2)="Cadenas PARTsolutions"
+valRGB=part.MaterialPropertyValues
+valRGB(0)=0.68999999761581
+valRGB(1)=0.68999999761581
+valRGB(2)=0.68999999761581
+part.MaterialPropertyValues=valRGB
+Dim featMgr as object
+set featMgr = part.FeatureManager
+codeBag0 part,featMgr
+part.ActiveView.EnableGraphicsUpdate = true
+part.SketchManager.DisplayWhenAdded = true
+part.SketchManager.AddToDB = false
+part.EditRebuild3
+part.Rebuild swRebuildAll
+Set modelExt = part.Extension
+modelExt.SaveAs storePath & "FPSSFJAD-D10-L100-T36-Q8.sldprt",0,0,nothing,errors,warnings
+End Sub
+sub codeBag1(part,wMat)
+cLn part,wMat,0,0,0,0.0045
+cLn part,wMat,0,0.0045,0.0005,0.005
+cLn part,wMat,0.0005,0.005,0.0998,0.005
+cLn part,wMat,0.0998,0.005,0.1,0.0048
+cLn part,wMat,0.1,0.0048,0.1,0.0043
+cArc part,wMat,0.1,0.0043,0.10008786796564,0.004087867965644,0.1003,0.004
+cLn part,wMat,0.1003,0.004,0.1355,0.004
+cLn part,wMat,0.1355,0.004,0.136,0.0035
+cLn part,wMat,0.136,0.0035,0.136,0
+cLn part,wMat,0.136,0,0,0
+cCLn part,wMat,0.136,0,0,0
+Part.SketchManager.InsertSketch True
+end sub
+
+sub codeBag0(part,featMgr)
+part.CreatePlaneFixed2 createVec3d(0,0,0),createVec3d(1,0,0),createVec3d(0,1,0),1
+set feat5=part.Extension.GetLastFeatureAdded()
+feat5.select2 false,0
+part.SketchManager.InsertSketch True
+part.BlankRefGeom
+Set swActiveMat = Part.SketchManager.ActiveSketch
+swSketchMat= createMatFromSWMat(swActiveMat.ModelToSketchXForm)
+mSkMat=createMat4x4FromValues(1,0,0,0,1,0,0,0,1,0,0,0)
+wMat=mulMat4x4Mat4x4(swSketchMat,mSkMat)
+codeBag1 part,wMat
+set feat5=part.Extension.GetLastFeatureAdded()
+feat5.select2 false,0
+featMgr.FeatureRevolve 6.2831853071796,1,6.2831853071796,0,0,1,1,1
+end sub
+
+sub main
+set swApp = Application.SldWorks
+code = swApp.RevisionNumber
+found = InStr(code, ".")
+If (found > 0) Then
+  code = Left(code, found-1)
+  docVisible=1
+  If (CInt(code) >= 18) Then
+    docVisible=0
+  End If
+End If
+swApp.SetUserPreferenceToggle 11, FALSE
+swApp.SetUserPreferenceToggle 97, FALSE
+storePath=BrowseForFolder
+If (storePath <> "") Then
+   If ((Right(storePath, 1) <> "\") And (Right(storePath, 1) <> "/")) Then
+       storePath = storePath + "\"
+   End If
+   createPart0
+End If
+end sub
