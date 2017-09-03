@@ -1,0 +1,229 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 11.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      6747,        221]
+NotebookOptionsPosition[      5513,        173]
+NotebookOutlinePosition[      5861,        188]
+CellTagsIndexPosition[      5818,        185]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Deck and Mold Calculations", "Title",
+ CellChangeTimes->{{3.713359903876771*^9, 3.7133599079326425`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell["Deck Composits", "Section",
+ CellChangeTimes->{{3.713359996871767*^9, 3.713360001358451*^9}}],
+
+Cell[CellGroupData[{
+
+Cell["Layer Thickness", "Subsection",
+ CellChangeTimes->{{3.7133600059285994`*^9, 3.713360018322235*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"carbonFiberThickness", "=", 
+   RowBox[{".017", "in"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"carbonFiberKevlarThickness", "=", 
+   RowBox[{".012", "in"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"polystyreneThichkness", "=", 
+   RowBox[{
+    RowBox[{"5", "/", "32"}], "in"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"deckThickness", "=", 
+   RowBox[{".5", "in"}]}], ";"}]}], "Input",
+ CellChangeTimes->{{3.7133594696271057`*^9, 3.7133595345156326`*^9}, {
+   3.7133595854651384`*^9, 3.7133595958802547`*^9}, 3.713359918936926*^9}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"carbonKevlarLayers", "=", "2"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"carbonLayers", "=", "9"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"polystyreneLayers", "=", "2"}], ";"}]}], "Input",
+ CellChangeTimes->{{3.7133609846293135`*^9, 3.713361021015128*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"compositeThickness", "=", 
+  RowBox[{
+   RowBox[{"carbonFiberKevlarThickness", "*", "carbonKevlarLayers"}], "+", 
+   RowBox[{"carbonFiberThickness", "*", "carbonLayers"}], "+", 
+   RowBox[{"polystyreneThichkness", "*", "polystyreneLayers"}]}]}]], "Input",
+ CellChangeTimes->{{3.713359550039468*^9, 3.7133596169209313`*^9}, {
+  3.713361026278762*^9, 3.71336104552182*^9}}],
+
+Cell[BoxData[
+ RowBox[{"0.48950000000000005`", " ", "in"}]], "Output",
+ CellChangeTimes->{
+  3.71335957448946*^9, {3.7133596128956676`*^9, 3.7133596173811564`*^9}, {
+   3.713361046428705*^9, 3.7133610544359756`*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"deckThickness", "-", "compositeThickness"}]], "Input",
+ CellChangeTimes->{{3.71335960031581*^9, 3.7133596226764755`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"0.010499999999999954`", " ", "in"}]], "Output",
+ CellChangeTimes->{
+  3.713359622982834*^9, {3.7133610486121335`*^9, 3.7133610544485083`*^9}}]
+}, Open  ]],
+
+Cell["the rest of the .01 will be filled by epoxy.", "Text",
+ CellChangeTimes->{{3.713359628895347*^9, 3.7133596461026754`*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Material Dimentions", "Subsection",
+ CellChangeTimes->{{3.7133600059285994`*^9, 3.7133600455687723`*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"deckWidth", "=", 
+   RowBox[{"13.25", "in"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"deckLength", "=", 
+   RowBox[{"48", "in"}]}], ";"}]}], "Input",
+ CellChangeTimes->{{3.713360051241043*^9, 3.713360058524016*^9}, {
+  3.7133601168621655`*^9, 3.7133601234413376`*^9}, {3.7133601712170353`*^9, 
+  3.7133601794391603`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"fabricExtra", "=", 
+   RowBox[{"1", "in"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.71336093998415*^9, 3.713360960056063*^9}, {
+  3.713361073822607*^9, 3.713361073986089*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{"fabricWidth", "=", 
+  RowBox[{"deckWidth", "+", 
+   RowBox[{"2", "*", "fabricExtra"}]}]}], "\[IndentingNewLine]", 
+ RowBox[{"fabricLength", "=", 
+  RowBox[{"deckLength", "+", 
+   RowBox[{"2", "*", "fabricExtra"}]}]}]}], "Input",
+ CellChangeTimes->{{3.7133610634843655`*^9, 3.713361112645094*^9}}],
+
+Cell[BoxData[
+ RowBox[{"15.25`", " ", "in"}]], "Output",
+ CellChangeTimes->{{3.7133610910841975`*^9, 3.713361113169489*^9}}],
+
+Cell[BoxData[
+ RowBox[{"50", " ", "in"}]], "Output",
+ CellChangeTimes->{{3.7133610910841975`*^9, 3.713361113171997*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"carbonBoltLength", "=", " ", 
+   RowBox[{"fabricWidth", "*", "carbonLayers"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{"carbonBoltYards", "=", 
+  RowBox[{"carbonBoltLength", "/", "36"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"carbonKevlarBoltLength", "=", " ", 
+   RowBox[{"fabricWidth", "*", "carbonKevlarLayers"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{"carbonKevlarBoltYards", "=", 
+  RowBox[{"carbonKevlarBoltLength", "/", "36"}]}]}], "Input",
+ CellChangeTimes->{{3.7133611225559907`*^9, 3.713361169209585*^9}, {
+  3.71336126697231*^9, 3.713361328623246*^9}}],
+
+Cell[BoxData[
+ RowBox[{"3.8125`", " ", "in"}]], "Output",
+ CellChangeTimes->{
+  3.7133611700172358`*^9, {3.713361282232957*^9, 3.7133613289134912`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"0.8472222222222222`", " ", "in"}]], "Output",
+ CellChangeTimes->{
+  3.7133611700172358`*^9, {3.713361282232957*^9, 3.7133613289155226`*^9}}]
+}, Open  ]],
+
+Cell["Rounded to 5yards of Carbon and 1 yard of CarbonKevlar.", "Text",
+ CellChangeTimes->{{3.713361334785817*^9, 3.7133613540578814`*^9}}]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{759, 697},
+WindowMargins->{{Automatic, 380}, {24, Automatic}},
+FrontEndVersion->"11.0 for Microsoft Windows (64-bit) (September 21, 2016)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 111, 1, 101, "Title"],
+Cell[CellGroupData[{
+Cell[716, 27, 99, 1, 70, "Section"],
+Cell[CellGroupData[{
+Cell[840, 32, 105, 1, 49, "Subsection"],
+Cell[948, 35, 608, 15, 88, "Input"],
+Cell[1559, 52, 317, 7, 69, "Input"],
+Cell[CellGroupData[{
+Cell[1901, 63, 395, 7, 50, "Input"],
+Cell[2299, 72, 216, 4, 30, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2552, 81, 145, 2, 30, "Input"],
+Cell[2700, 85, 166, 3, 30, "Output"]
+}, Open  ]],
+Cell[2881, 91, 128, 1, 30, "Text"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[3046, 97, 111, 1, 49, "Subsection"],
+Cell[3160, 100, 371, 9, 50, "Input"],
+Cell[3534, 111, 211, 5, 30, "Input"],
+Cell[CellGroupData[{
+Cell[3770, 120, 321, 7, 50, "Input"],
+Cell[4094, 129, 124, 2, 30, "Output"],
+Cell[4221, 133, 120, 2, 30, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4378, 140, 619, 14, 88, "Input"],
+Cell[5000, 156, 152, 3, 30, "Output"],
+Cell[5155, 161, 164, 3, 30, "Output"]
+}, Open  ]],
+Cell[5334, 167, 139, 1, 30, "Text"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
