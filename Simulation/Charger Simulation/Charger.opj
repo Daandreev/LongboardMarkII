@@ -1,0 +1,58 @@
+(ExpressProject "Charger"
+  (ProjectVersion "19981106")
+  (ProjectType "PCB")
+  (Folder "Design Resources"
+    (Folder "Library")
+    (NoModify)
+    (File ".\charger.dsn"
+      (Type "Schematic Design"))
+    (BuildFileAddedOrDeleted "x")
+    (CompileFileAddedOrDeleted "x"))
+  (Folder "Outputs")
+  (Folder "Referenced Projects")
+  (PartMRUSelector
+    (VAC
+      (FullPartName "VAC.Normal")
+      (LibraryName
+         "C:\CADENCE\SPB_17.2\TOOLS\CAPTURE\LIBRARY\PSPICE\SOURCE.OLB")
+      (DeviceIndex "0"))
+    (IPULSE
+      (FullPartName "IPULSE.Normal")
+      (LibraryName
+         "C:\CADENCE\SPB_17.2\TOOLS\CAPTURE\LIBRARY\PSPICE\SOURCE.OLB")
+      (DeviceIndex "0"))
+    (IAC
+      (FullPartName "IAC.Normal")
+      (LibraryName
+         "C:\CADENCE\SPB_17.2\TOOLS\CAPTURE\LIBRARY\PSPICE\SOURCE.OLB")
+      (DeviceIndex "0"))
+    (MAX5035
+      (FullPartName "MAX5035.Normal")
+      (LibraryName
+         "F:\MARKII\LONGBOARDMARKII\SIMULATION\LIBS\POWER-SUPPLIES-AND-BATTERY-MANAGEMENT.OLB")
+      (DeviceIndex "0")))
+  (LastUsedLibraryBrowseDirectory "F:\MarkII\LongboardMarkII\Simulation\Libs")
+  (GlobalState
+    (FileView
+      (Path "Design Resources")
+      (Path "Design Resources" ".\charger.dsn")
+      (Path "Design Resources" ".\charger.dsn" "SCHEMATIC1")
+      (Select "Design Resources" ".\charger.dsn" "SCHEMATIC1" "PAGE1"))
+    (HierarchyView)
+    (Doc
+      (Type "COrCapturePMDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -31 0 200 0 282"))
+      (Tab 0))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -8 -31 52 1382 52 373")
+        (Scroll "-156 20")
+        (Zoom "100")
+        (Occurrence "/"))
+      (Path
+         "F:\MARKII\LONGBOARDMARKII\SIMULATION\CHARGER SIMULATION\CHARGER.DSN")
+      (Schematic "SCHEMATIC1")
+      (Page "PAGE1")))
+  (MPSSessionName "Danny Andreev"))
