@@ -690,11 +690,20 @@ UsedLibrary="C:/EAGLE 8.3.1/lbr/zetex.lbr"
 UsedLibrary="C:/EAGLE 8.3.1/lbr/zilog.lbr"
 
 [Win_1]
+Type="CAM Processor"
+Loc="0 0 1199 599"
+State=0
+Number=3
+File="BatterySpacer1X9_Panel.brd"
+Job="C:/EAGLE 8.3.1/cam/sfe-gerb274x.cam"
+
+[Win_2]
 Type="Control Panel"
 Loc="0 0 1199 639"
 State=2
 Number=0
 
 [Desktop]
-Screen="1920 1080"
+Screen="3840 1080"
 Window="Win_1"
+Window="Win_2"
