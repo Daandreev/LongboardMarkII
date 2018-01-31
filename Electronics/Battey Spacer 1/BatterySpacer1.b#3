@@ -79,6 +79,26 @@
 <wire x1="14" y1="14" x2="3" y2="3" width="0.01" layer="20"/>
 </plain>
 <libraries>
+<library name="MarkIIEaglelbr">
+<packages>
+<package name="TSSOP">
+<wire x1="-1.83" y1="1.56" x2="1.83" y2="1.56" width="0.127" layer="21"/>
+<wire x1="1.83" y1="1.56" x2="1.83" y2="-1.56" width="0.127" layer="21"/>
+<wire x1="1.83" y1="-1.56" x2="-1.83" y2="-1.56" width="0.127" layer="21"/>
+<wire x1="-1.83" y1="-1.56" x2="-1.83" y2="1.56" width="0.127" layer="21"/>
+<smd name="P$1" x="-2.95" y="0.975" dx="1.5" dy="0.5" layer="1"/>
+<smd name="P$2" x="-2.95" y="0.325" dx="1.5" dy="0.5" layer="1"/>
+<smd name="P$3" x="-2.95" y="-0.325" dx="1.5" dy="0.5" layer="1"/>
+<smd name="P$4" x="-2.95" y="-0.975" dx="1.5" dy="0.5" layer="1"/>
+<smd name="P$5" x="2.95" y="-0.975" dx="1.5" dy="0.5" layer="1"/>
+<smd name="P$6" x="2.95" y="-0.325" dx="1.5" dy="0.5" layer="1"/>
+<smd name="P$7" x="2.95" y="0.325" dx="1.5" dy="0.5" layer="1"/>
+<smd name="P$8" x="2.95" y="0.975" dx="1.5" dy="0.5" layer="1"/>
+<circle x="-2.75" y="1.75" radius="0.25" width="0.127" layer="21"/>
+<text x="-2" y="2" size="1.016" layer="25">&gt;Name</text>
+</package>
+</packages>
+</library>
 </libraries>
 <attributes>
 </attributes>
@@ -268,6 +288,7 @@ design rules under a new name.</description>
 </pass>
 </autorouter>
 <elements>
+<element name="IC1" library="MarkIIEaglelbr" package="TSSOP" value="MCP9843T" x="14" y="2.5"/>
 </elements>
 <signals>
 <signal name="N$1">

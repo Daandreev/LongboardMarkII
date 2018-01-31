@@ -67,11 +67,25 @@
 <wire x1="80" y1="50" x2="85" y2="45" width="0.01" layer="20" curve="-90"/>
 <wire x1="85" y1="5" x2="80" y2="0" width="0.01" layer="20" curve="-90"/>
 <wire x1="5" y1="0" x2="0" y2="5" width="0.01" layer="20" curve="-90"/>
-<text x="5" y="40" size="5" layer="25" font="fixed">Daniil Andreev</text>
+<text x="5" y="40" size="4.87" layer="25" font="fixed">Daniil Andreev</text>
 <text x="5" y="35" size="4" layer="25" font="fixed">Hardware Engineer</text>
-<text x="5" y="19" size="3" layer="25" font="fixed">dannyandreev.com</text>
-<text x="5" y="25" size="3" layer="25" font="fixed">650-704-9677</text>
-<text x="5" y="29" size="3" layer="25" font="fixed">andreev.danny@gmail.com</text>
+<text x="5" y="19" size="2.94" layer="25" font="fixed">dannyandreev.com</text>
+<text x="5" y="25" size="2.94" layer="25" font="fixed">650-704-9677</text>
+<text x="5" y="29" size="2.94" layer="25" font="fixed">andreev.danny@gmail.com</text>
+<circle x="20" y="5" radius="0.1" width="0.4" layer="17"/>
+<circle x="25" y="10" radius="0.1" width="0.4" layer="17"/>
+<circle x="15" y="5" radius="0.1" width="0.4" layer="17"/>
+<circle x="10" y="5" radius="0.1" width="0.4" layer="17"/>
+<circle x="15" y="10" radius="0.1" width="0.4" layer="17"/>
+<circle x="20" y="10" radius="0.1" width="0.4" layer="17"/>
+<circle x="20" y="15" radius="0.1" width="0.4" layer="17"/>
+<circle x="25" y="15" radius="0.1" width="0.4" layer="17"/>
+<circle x="30" y="15" radius="0.1" width="0.4" layer="17"/>
+<circle x="40" y="25" radius="0.1" width="0.4" layer="17"/>
+<circle x="35" y="25" radius="0.1" width="0.4" layer="17"/>
+<circle x="60" y="45" radius="0.1" width="0.4" layer="17"/>
+<circle x="55" y="45" radius="0.1" width="0.4" layer="17"/>
+<circle x="50" y="45" radius="0.1" width="0.4" layer="17"/>
 </plain>
 <libraries>
 </libraries>
@@ -265,6 +279,221 @@ design rules under a new name.</description>
 <elements>
 </elements>
 <signals>
+<signal name="N$1">
+<via x="80" y="5" extent="1-16" drill="2"/>
+</signal>
+<signal name="N$2">
+<via x="80" y="10" extent="1-16" drill="2"/>
+</signal>
+<signal name="N$3">
+<via x="75" y="5" extent="1-16" drill="2"/>
+</signal>
+<signal name="N$4">
+<via x="70" y="5" extent="1-16" drill="2"/>
+</signal>
+<signal name="N$5">
+<via x="80" y="15" extent="1-16" drill="2"/>
+</signal>
+<signal name="N$6">
+<via x="75" y="10" extent="1-16" drill="2"/>
+</signal>
+<signal name="N$14">
+<via x="65" y="10" extent="1-16" drill="1.5"/>
+</signal>
+<signal name="N$15">
+<via x="70" y="15" extent="1-16" drill="1.5"/>
+</signal>
+<signal name="N$16">
+<via x="75" y="20" extent="1-16" drill="1.5"/>
+</signal>
+<signal name="N$17">
+<via x="60" y="5" extent="1-16" drill="1.5"/>
+</signal>
+<signal name="N$18">
+<via x="55" y="5" extent="1-16" drill="1.5"/>
+</signal>
+<signal name="N$19">
+<via x="60" y="10" extent="1-16" drill="1.5"/>
+</signal>
+<signal name="N$20">
+<via x="65" y="15" extent="1-16" drill="1.5"/>
+</signal>
+<signal name="N$21">
+<via x="65" y="5" extent="1-16" drill="1.5"/>
+</signal>
+<signal name="N$22">
+<via x="70" y="20" extent="1-16" drill="1.5"/>
+</signal>
+<signal name="N$23">
+<via x="70" y="10" extent="1-16" drill="1.5"/>
+</signal>
+<signal name="N$24">
+<via x="75" y="25" extent="1-16" drill="1.5"/>
+</signal>
+<signal name="N$25">
+<via x="80" y="25" extent="1-16" drill="1.5"/>
+</signal>
+<signal name="N$26">
+<via x="80" y="30" extent="1-16" drill="1.5"/>
+</signal>
+<signal name="N$27">
+<via x="75" y="15" extent="1-16" drill="1.5"/>
+</signal>
+<signal name="N$7">
+<via x="80" y="20" extent="1-16" drill="1.5"/>
+</signal>
+<signal name="N$8">
+<via x="50" y="5" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$9">
+<via x="55" y="10" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$10">
+<via x="60" y="15" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$11">
+<via x="65" y="20" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$12">
+<via x="70" y="25" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$13">
+<via x="75" y="30" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$28">
+<via x="80" y="35" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$29">
+<via x="75" y="35" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$30">
+<via x="80" y="40" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$31">
+<via x="70" y="30" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$32">
+<via x="65" y="25" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$33">
+<via x="60" y="20" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$34">
+<via x="55" y="15" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$35">
+<via x="50" y="10" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$36">
+<via x="45" y="5" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$37">
+<via x="40" y="5" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$38">
+<via x="45" y="10" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$39">
+<via x="50" y="15" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$40">
+<via x="55" y="20" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$41">
+<via x="60" y="25" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$42">
+<via x="65" y="30" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$43">
+<via x="70" y="35" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$44">
+<via x="75" y="40" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$45">
+<via x="80" y="45" extent="1-16" drill="1"/>
+</signal>
+<signal name="N$46">
+<via x="35" y="5" extent="1-16" drill="0.5"/>
+</signal>
+<signal name="N$47">
+<via x="40" y="10" extent="1-16" drill="0.5"/>
+</signal>
+<signal name="N$48">
+<via x="45" y="15" extent="1-16" drill="0.5"/>
+</signal>
+<signal name="N$49">
+<via x="50" y="20" extent="1-16" drill="0.5"/>
+</signal>
+<signal name="N$50">
+<via x="55" y="25" extent="1-16" drill="0.5"/>
+</signal>
+<signal name="N$51">
+<via x="65" y="35" extent="1-16" drill="0.5"/>
+</signal>
+<signal name="N$52">
+<via x="70" y="40" extent="1-16" drill="0.5"/>
+</signal>
+<signal name="N$53">
+<via x="75" y="45" extent="1-16" drill="0.5"/>
+</signal>
+<signal name="N$54">
+<via x="70" y="45" extent="1-16" drill="0.5"/>
+</signal>
+<signal name="N$55">
+<via x="65" y="40" extent="1-16" drill="0.5"/>
+</signal>
+<signal name="N$56">
+<via x="65" y="45" extent="1-16" drill="0.5"/>
+</signal>
+<signal name="N$57">
+<via x="50" y="25" extent="1-16" drill="0.5"/>
+</signal>
+<signal name="N$58">
+<via x="45" y="25" extent="1-16" drill="0.5"/>
+</signal>
+<signal name="N$59">
+<via x="40" y="15" extent="1-16" drill="0.5"/>
+</signal>
+<signal name="N$60">
+<via x="35" y="10" extent="1-16" drill="0.5"/>
+</signal>
+<signal name="N$61">
+<via x="30" y="10" extent="1-16" drill="0.5"/>
+</signal>
+<signal name="N$62">
+<via x="35" y="15" extent="1-16" drill="0.5"/>
+</signal>
+<signal name="N$63">
+<via x="30" y="5" extent="1-16" drill="0.5"/>
+<via x="25" y="5" extent="1-16" drill="0.5"/>
+<wire x1="25" y1="5" x2="30" y2="5" width="0" layer="19" extent="1-1"/>
+</signal>
+<signal name="N$65">
+<polygon width="0.4" layer="16">
+<vertex x="-1" y="45"/>
+<vertex x="-1" y="5" curve="90"/>
+<vertex x="5" y="-1"/>
+<vertex x="80" y="-1" curve="90"/>
+<vertex x="86" y="5"/>
+<vertex x="86" y="45" curve="90"/>
+<vertex x="80" y="51"/>
+<vertex x="5" y="51" curve="90"/>
+</polygon>
+</signal>
+<signal name="N$64">
+<polygon width="0.4" layer="1">
+<vertex x="-1" y="45"/>
+<vertex x="-1" y="5" curve="90"/>
+<vertex x="5" y="-1"/>
+<vertex x="80" y="-1" curve="90"/>
+<vertex x="86" y="5"/>
+<vertex x="86" y="45" curve="90"/>
+<vertex x="80" y="51"/>
+<vertex x="5" y="51" curve="90"/>
+</polygon>
+</signal>
 </signals>
 </board>
 </drawing>

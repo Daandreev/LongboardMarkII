@@ -22,7 +22,7 @@
 <layer number="26" name="bNames" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="27" name="tValues" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="28" name="bValues" color="7" fill="1" visible="yes" active="yes"/>
-<layer number="29" name="tStop" color="7" fill="3" visible="no" active="yes"/>
+<layer number="29" name="tStop" color="7" fill="3" visible="yes" active="yes"/>
 <layer number="30" name="bStop" color="7" fill="6" visible="no" active="yes"/>
 <layer number="31" name="tCream" color="7" fill="4" visible="no" active="yes"/>
 <layer number="32" name="bCream" color="7" fill="5" visible="no" active="yes"/>
@@ -67,11 +67,11 @@
 <wire x1="80" y1="50" x2="85" y2="45" width="0.01" layer="20" curve="-90"/>
 <wire x1="85" y1="5" x2="80" y2="0" width="0.01" layer="20" curve="-90"/>
 <wire x1="5" y1="0" x2="0" y2="5" width="0.01" layer="20" curve="-90"/>
-<text x="5" y="40" size="5" layer="25" font="fixed">Daniil Andreev</text>
+<text x="5" y="40" size="4.87" layer="25" font="fixed">Daniil Andreev</text>
 <text x="5" y="35" size="4" layer="25" font="fixed">Hardware Engineer</text>
-<text x="5" y="19" size="3" layer="25" font="fixed">dannyandreev.com</text>
-<text x="5" y="25" size="3" layer="25" font="fixed">650-704-9677</text>
-<text x="5" y="29" size="3" layer="25" font="fixed">andreev.danny@gmail.com</text>
+<text x="5" y="19" size="2.94" layer="25" font="fixed">dannyandreev.com</text>
+<text x="5" y="25" size="2.94" layer="25" font="fixed">650-704-9677</text>
+<text x="5" y="29" size="2.94" layer="25" font="fixed">andreev.danny@gmail.com</text>
 </plain>
 <libraries>
 </libraries>
@@ -438,6 +438,9 @@ design rules under a new name.</description>
 </signal>
 <signal name="N$58">
 <via x="45" y="25" extent="1-16" drill="0.5"/>
+<via x="40" y="25" extent="1-16" drill="0.000009375"/>
+<via x="35" y="25" extent="1-16" drill="0.000009375"/>
+<via x="30" y="15" extent="1-16" drill="0.000009375"/>
 </signal>
 <signal name="N$59">
 <via x="40" y="15" extent="1-16" drill="0.5"/>
@@ -453,39 +456,65 @@ design rules under a new name.</description>
 </signal>
 <signal name="N$63">
 <via x="30" y="5" extent="1-16" drill="0.5"/>
-</signal>
-<signal name="N$64">
 <via x="25" y="5" extent="1-16" drill="0.5"/>
+<wire x1="25" y1="5" x2="30" y2="5" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$65">
-<via x="20" y="5" extent="1-16" drill="0.1"/>
+<polygon width="0.4" layer="16">
+<vertex x="-1" y="45"/>
+<vertex x="-1" y="5" curve="90"/>
+<vertex x="5" y="-1"/>
+<vertex x="80" y="-1" curve="90"/>
+<vertex x="86" y="5"/>
+<vertex x="86" y="45" curve="90"/>
+<vertex x="80" y="51"/>
+<vertex x="5" y="51" curve="90"/>
+</polygon>
+</signal>
+<signal name="N$64">
+<polygon width="0.4" layer="1">
+<vertex x="-1" y="45"/>
+<vertex x="-1" y="5" curve="90"/>
+<vertex x="5" y="-1"/>
+<vertex x="80" y="-1" curve="90"/>
+<vertex x="86" y="5"/>
+<vertex x="86" y="45" curve="90"/>
+<vertex x="80" y="51"/>
+<vertex x="5" y="51" curve="90"/>
+</polygon>
 </signal>
 <signal name="N$66">
-<via x="25" y="10" extent="1-16" drill="0.1"/>
+<via x="25" y="15" extent="1-16" drill="0.000009375"/>
 </signal>
 <signal name="N$67">
-<via x="30" y="15" extent="1-16" drill="0.1"/>
+<via x="20" y="15" extent="1-16" drill="0.000009375"/>
 </signal>
 <signal name="N$68">
-<via x="15" y="5" extent="1-16" drill="0.1"/>
+<via x="20" y="5" extent="1-16" drill="0.000009375"/>
 </signal>
 <signal name="N$69">
-<via x="20" y="10" extent="1-16" drill="0.1"/>
+<via x="15" y="5" extent="1-16" drill="0.000009375"/>
 </signal>
 <signal name="N$70">
-<via x="25" y="15" extent="1-16" drill="0.1"/>
+<via x="10" y="5" extent="1-16" drill="0.000009375"/>
 </signal>
 <signal name="N$71">
-<via x="40" y="25" extent="1-16" drill="0.1"/>
+<via x="20" y="10" extent="1-16" drill="0.000009375"/>
 </signal>
 <signal name="N$72">
-<via x="60" y="45" extent="1-16" drill="0.1"/>
+<via x="25" y="10" extent="1-16" drill="0.000009375"/>
 </signal>
 <signal name="N$73">
-<via x="55" y="45" extent="1-16" drill="0.1"/>
+<via x="15" y="10" extent="1-16" drill="0.000009375"/>
 </signal>
 <signal name="N$74">
-<via x="50" y="45" extent="1-16" drill="0.1"/>
+<via x="60" y="45" extent="1-16" drill="0.000009375"/>
+</signal>
+<signal name="N$75">
+<via x="55" y="45" extent="1-16" drill="0.000009375"/>
+</signal>
+<signal name="N$76">
+<via x="50" y="45" extent="1-16" drill="0.000009375"/>
 </signal>
 </signals>
 </board>
