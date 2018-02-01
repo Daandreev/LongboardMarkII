@@ -691,20 +691,12 @@ UsedLibrary="C:/EAGLE 8.3.1/lbr/zetex.lbr"
 UsedLibrary="C:/EAGLE 8.3.1/lbr/zilog.lbr"
 
 [Win_1]
-Type="CAM Processor"
-Loc="309 264 1508 863"
-State=2
-Number=2
-File="BMSMAX14921Based.brd"
-Job="C:/EAGLE 8.3.1/cam/sfe-gerb274x.cam"
-
-[Win_2]
 Type="Board Editor"
 Loc="0 0 1919 1016"
-State=1
+State=3
 Number=3
 File="BMSMAX14921Based.brd"
-View="-11.1564 -10.3955 56.469 44.8146"
+View="-4.99481 -6.64123 62.6306 48.5689"
 WireWidths=" 0.0762 0.1016 0.127 0.15 0.2 0.2032 0.254 0.3048 0.4064 0.508 0.6096 0.8128 1.016 1.27 2.54 0.1524"
 PadDiameters=" 0.254 0.3048 0.4064 0.6096 0.8128 1.016 1.27 1.4224 1.6764 1.778 1.9304 2.1844 2.54 3.81 6.4516 0"
 PadDrills=" 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.65 0.7 0.75 0.8 0.85 0.9 1 0.6"
@@ -744,10 +736,10 @@ AddLevel=2
 PadsSameType=0
 Layer=1
 
-[Win_3]
+[Win_2]
 Type="Schematic Editor"
 Loc="0 0 1919 1016"
-State=1
+State=3
 Number=1
 File="BMSMAX14921Based.sch"
 View="-172.835 -20.4945 -70.1301 82.2109"
@@ -792,15 +784,14 @@ Layer=91
 Views=" 1: -172.835 -20.4945 -70.1301 82.2109"
 Sheet="1"
 
-[Win_4]
+[Win_3]
 Type="Control Panel"
-Loc="232 105 1431 744"
+Loc="369 267 1568 906"
 State=2
 Number=0
 
 [Desktop]
-Screen="1920 1080"
+Screen="3840 1080"
 Window="Win_1"
 Window="Win_2"
 Window="Win_3"
-Window="Win_4"
