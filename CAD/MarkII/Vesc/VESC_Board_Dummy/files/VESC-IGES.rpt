@@ -1,0 +1,66 @@
+*****************************************************************
+      SolidWorks Corporation - IGES Processor Status Report
+*****************************************************************
+=================================================================
+General Information
+=================================================================
+Sending System Product I.D.  : VESC-IGES
+Receiving System Product I.D.: 
+File Name                    : VESC-IGES
+Sending System               : unknown
+Preprocessor Version         : unknown
+File Creation Date           : 20170716.234604
+Model Creation Date          : 
+Units                        : MM
+Model Space Scale            : 1
+Author                       : unknown
+Organization                 : unknown
+
+
+=================================================================
+Entity Processing Information
+=================================================================
+
+
+=================================================================
+Precision analysis of IGES file:
+=================================================================
+  Most prevalent number of significant digits:              14
+  Highest number of significant digits:                     14
+  Average number of significant digits:                11.1028
+  Maximum distance to origin:                          76.1011
+  Minimum distance to origin:                                0
+  Effective number of significant digits:                   14
+
+
+=================================================================
+Entity Summary
+=================================================================
+-----------------------------------------------------------------
+Type Name                                         Count Converted
+---- ----                                         ----- ---------
+126  Rational B-spline curve                       1600      1600
+128  Rational B-spline surface                      656       656
+186  Manifold Solid B-rep Object                      1         1
+314  Color definition                                 1         1
+406  Property                                         1         1
+502  Vertex list                                      1         1
+504  Edge entity                                      1         1
+508  Loop entity                                    783       783
+510  Face entity                                    656       656
+514  Shell entity                                     1         1
+_________________________________________________________________
+
+
+=================================================================
+Result Summary
+=================================================================
+SolidWorks Feature Type                Count
+-----------------------                -----
+Solid feature(s)                       0
+Surface feature(s)                     1
+Curve/Sketch feature(s)                0
+--------------------------------------------
+Start time: Monday, February 05, 2018 13:06:32
+Finish time: Monday, February 05, 2018 13:06:38
+Processing time: 0 days, 00 hours, 00 mins, 06 secs
