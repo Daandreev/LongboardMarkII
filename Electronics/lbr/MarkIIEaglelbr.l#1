@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.25" unitdist="mm" unit="mm" style="lines" multiple="1" display="yes" altdistance="5" altunitdist="mil" altunit="mil"/>
+<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
 <layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="yes"/>
@@ -265,6 +265,37 @@
 <text x="-10" y="-2" size="1" layer="25" rot="R90">&gt;NAME</text>
 <pad name="P$17" x="-6" y="1" drill="0.7"/>
 <pad name="P$18" x="-8" y="1" drill="0.7"/>
+</package>
+<package name="10-VSSOP">
+<smd name="P$1" x="-1" y="-2.35" dx="1" dy="0.25" layer="1" rot="R90"/>
+<smd name="P$2" x="-0.5" y="-2.35" dx="1" dy="0.25" layer="1" rot="R90"/>
+<smd name="P$3" x="0" y="-2.35" dx="1" dy="0.25" layer="1" rot="R90"/>
+<smd name="P$4" x="0.5" y="-2.35" dx="1" dy="0.25" layer="1" rot="R90"/>
+<smd name="P$5" x="1" y="-2.35" dx="1" dy="0.25" layer="1" rot="R90"/>
+<wire x1="-1.5" y1="-1.5" x2="1.5" y2="-1.5" width="0.127" layer="21"/>
+<wire x1="1.5" y1="-1.5" x2="1.5" y2="1.5" width="0.127" layer="21"/>
+<wire x1="1.5" y1="1.5" x2="-1.5" y2="1.5" width="0.127" layer="21"/>
+<wire x1="-1.5" y1="1.5" x2="-1.5" y2="-1.5" width="0.127" layer="21"/>
+<smd name="P$6" x="1" y="2.35" dx="1" dy="0.25" layer="1" rot="R270"/>
+<smd name="P$7" x="0.5" y="2.35" dx="1" dy="0.25" layer="1" rot="R270"/>
+<smd name="P$8" x="0" y="2.35" dx="1" dy="0.25" layer="1" rot="R270"/>
+<smd name="P$9" x="-0.5" y="2.35" dx="1" dy="0.25" layer="1" rot="R270"/>
+<smd name="P$10" x="-1" y="2.35" dx="1" dy="0.25" layer="1" rot="R270"/>
+<circle x="-2.25" y="-1.5" radius="0.353553125" width="0.127" layer="21"/>
+<text x="-1.75" y="-1" size="0.7" layer="21" font="vector" rot="R90">&gt;Name</text>
+</package>
+<package name="SOT-23">
+<smd name="1" x="-2.61" y="0.905" dx="1.2192" dy="0.6096" layer="1"/>
+<smd name="2" x="-2.61" y="-0.895" dx="1.2192" dy="0.6096" layer="1"/>
+<smd name="3" x="-0.01" y="0.005" dx="1.2192" dy="0.6096" layer="1" rot="R180"/>
+<wire x1="-2.21" y1="1.305" x2="-2.21" y2="1.505" width="0.1" layer="21"/>
+<wire x1="-2.21" y1="1.505" x2="-0.41" y2="1.505" width="0.1" layer="21"/>
+<wire x1="-2.21" y1="0.505" x2="-2.21" y2="-0.495" width="0.1" layer="21"/>
+<wire x1="-2.21" y1="-1.295" x2="-2.21" y2="-1.495" width="0.1" layer="21"/>
+<wire x1="-2.21" y1="-1.495" x2="-0.41" y2="-1.495" width="0.1" layer="21"/>
+<wire x1="-0.41" y1="-1.495" x2="-0.41" y2="-0.395" width="0.1" layer="21"/>
+<wire x1="-0.41" y1="0.405" x2="-0.41" y2="1.505" width="0.1" layer="21"/>
+<text x="-3.16" y="1.8125" size="0.762" layer="25">&gt;NAME</text>
 </package>
 </packages>
 <symbols>
@@ -566,6 +597,33 @@
 <pin name="P$17" x="-7.62" y="5.08" visible="off" length="short" rot="R270"/>
 <pin name="P$18" x="-10.16" y="5.08" visible="off" length="short" rot="R270"/>
 </symbol>
+<symbol name="ADC141S626">
+<pin name="VREF" x="-10.16" y="5.08" visible="pin" length="short"/>
+<pin name="+IN" x="-10.16" y="2.54" visible="pin" length="short"/>
+<pin name="-IN" x="-10.16" y="0" visible="pin" length="short"/>
+<pin name="GND" x="-10.16" y="-2.54" visible="pin" length="short"/>
+<pin name="GND2" x="-10.16" y="-5.08" visible="pin" length="short"/>
+<pin name="CS" x="10.16" y="-5.08" visible="pin" length="short" rot="R180"/>
+<pin name="DOUT" x="10.16" y="-2.54" visible="pin" length="short" rot="R180"/>
+<pin name="SCLK" x="10.16" y="0" visible="pin" length="short" rot="R180"/>
+<pin name="VIO" x="10.16" y="2.54" visible="pin" length="short" rot="R180"/>
+<pin name="VA" x="10.16" y="5.08" visible="pin" length="short" rot="R180"/>
+<wire x1="-7.62" y1="7.62" x2="7.62" y2="7.62" width="0.254" layer="94"/>
+<wire x1="7.62" y1="7.62" x2="7.62" y2="-7.62" width="0.254" layer="94"/>
+<wire x1="7.62" y1="-7.62" x2="-7.62" y2="-7.62" width="0.254" layer="94"/>
+<wire x1="-7.62" y1="-7.62" x2="-7.62" y2="7.62" width="0.254" layer="94"/>
+<text x="-7.62" y="8.255" size="1.27" layer="95">&gt;NAME</text>
+</symbol>
+<symbol name="VREF">
+<pin name="VOUT" x="10.16" y="2.54" visible="pin" length="short" rot="R180"/>
+<pin name="VIN" x="-10.16" y="2.54" visible="pin" length="short"/>
+<pin name="GND" x="0" y="-7.62" visible="pin" length="short" rot="R90"/>
+<wire x1="-7.62" y1="5.08" x2="7.62" y2="5.08" width="0.254" layer="94"/>
+<wire x1="7.62" y1="5.08" x2="7.62" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="7.62" y1="-5.08" x2="-7.62" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="-7.62" y1="-5.08" x2="-7.62" y2="5.08" width="0.254" layer="94"/>
+<text x="-5.08" y="7.62" size="1.27" layer="95">&gt;NAME</text>
+</symbol>
 </symbols>
 <devicesets>
 <deviceset name="MCP9843T" prefix="IC">
@@ -596,6 +654,88 @@
 </gates>
 <devices>
 <device name="" package="80TQFP">
+<connects>
+<connect gate="G$1" pin="AGND" pad="P$11"/>
+<connect gate="G$1" pin="AOUT" pad="P$10"/>
+<connect gate="G$1" pin="BA1" pad="P$76"/>
+<connect gate="G$1" pin="BA10" pad="P$40"/>
+<connect gate="G$1" pin="BA11" pad="P$36"/>
+<connect gate="G$1" pin="BA12" pad="P$32"/>
+<connect gate="G$1" pin="BA13" pad="P$28"/>
+<connect gate="G$1" pin="BA14" pad="P$24"/>
+<connect gate="G$1" pin="BA15" pad="P$20"/>
+<connect gate="G$1" pin="BA16" pad="P$16"/>
+<connect gate="G$1" pin="BA2" pad="P$72"/>
+<connect gate="G$1" pin="BA3" pad="P$68"/>
+<connect gate="G$1" pin="BA4" pad="P$64"/>
+<connect gate="G$1" pin="BA5" pad="P$60"/>
+<connect gate="G$1" pin="BA6" pad="P$56"/>
+<connect gate="G$1" pin="BA7" pad="P$52"/>
+<connect gate="G$1" pin="BA8" pad="P$48"/>
+<connect gate="G$1" pin="BA9" pad="P$44"/>
+<connect gate="G$1" pin="CB10" pad="P$42"/>
+<connect gate="G$1" pin="CB11" pad="P$38"/>
+<connect gate="G$1" pin="CB12" pad="P$34"/>
+<connect gate="G$1" pin="CB13" pad="P$30"/>
+<connect gate="G$1" pin="CB14" pad="P$26"/>
+<connect gate="G$1" pin="CB15" pad="P$22"/>
+<connect gate="G$1" pin="CB16" pad="P$18"/>
+<connect gate="G$1" pin="CB2" pad="P$74"/>
+<connect gate="G$1" pin="CB3" pad="P$70"/>
+<connect gate="G$1" pin="CB4" pad="P$66"/>
+<connect gate="G$1" pin="CB5" pad="P$62"/>
+<connect gate="G$1" pin="CB6" pad="P$58"/>
+<connect gate="G$1" pin="CB7" pad="P$54"/>
+<connect gate="G$1" pin="CB8" pad="P$50"/>
+<connect gate="G$1" pin="CB9" pad="P$46"/>
+<connect gate="G$1" pin="CS" pad="P$80"/>
+<connect gate="G$1" pin="CT1" pad="P$77"/>
+<connect gate="G$1" pin="CT10" pad="P$41"/>
+<connect gate="G$1" pin="CT11" pad="P$37"/>
+<connect gate="G$1" pin="CT12" pad="P$33"/>
+<connect gate="G$1" pin="CT13" pad="P$29"/>
+<connect gate="G$1" pin="CT14" pad="P$25"/>
+<connect gate="G$1" pin="CT15" pad="P$21"/>
+<connect gate="G$1" pin="CT16" pad="P$17"/>
+<connect gate="G$1" pin="CT2" pad="P$73"/>
+<connect gate="G$1" pin="CT3" pad="P$69"/>
+<connect gate="G$1" pin="CT4" pad="P$65"/>
+<connect gate="G$1" pin="CT5" pad="P$61"/>
+<connect gate="G$1" pin="CT6" pad="P$57"/>
+<connect gate="G$1" pin="CT7" pad="P$53"/>
+<connect gate="G$1" pin="CT8" pad="P$49"/>
+<connect gate="G$1" pin="CT9" pad="P$45"/>
+<connect gate="G$1" pin="CV0" pad="P$78"/>
+<connect gate="G$1" pin="CV1" pad="P$75"/>
+<connect gate="G$1" pin="CV10" pad="P$39"/>
+<connect gate="G$1" pin="CV11" pad="P$35"/>
+<connect gate="G$1" pin="CV12" pad="P$31"/>
+<connect gate="G$1" pin="CV13" pad="P$27"/>
+<connect gate="G$1" pin="CV14" pad="P$23"/>
+<connect gate="G$1" pin="CV15" pad="P$19"/>
+<connect gate="G$1" pin="CV16" pad="P$15"/>
+<connect gate="G$1" pin="CV2" pad="P$71"/>
+<connect gate="G$1" pin="CV3" pad="P$67"/>
+<connect gate="G$1" pin="CV4" pad="P$63"/>
+<connect gate="G$1" pin="CV5" pad="P$59"/>
+<connect gate="G$1" pin="CV6" pad="P$55"/>
+<connect gate="G$1" pin="CV7" pad="P$51"/>
+<connect gate="G$1" pin="CV8" pad="P$47"/>
+<connect gate="G$1" pin="CV9" pad="P$43"/>
+<connect gate="G$1" pin="DGND" pad="P$6"/>
+<connect gate="G$1" pin="EN" pad="P$79"/>
+<connect gate="G$1" pin="LDOIN" pad="P$13"/>
+<connect gate="G$1" pin="SAMPL" pad="P$4"/>
+<connect gate="G$1" pin="SCLK" pad="P$1"/>
+<connect gate="G$1" pin="SDI" pad="P$2"/>
+<connect gate="G$1" pin="SDO" pad="P$3"/>
+<connect gate="G$1" pin="T1" pad="P$9"/>
+<connect gate="G$1" pin="T2" pad="P$8"/>
+<connect gate="G$1" pin="T3" pad="P$7"/>
+<connect gate="G$1" pin="VA" pad="P$12"/>
+<connect gate="G$1" pin="VL" pad="P$5"/>
+<connect gate="G$1" pin="VP" pad="P$14"/>
+</connects>
 <technologies>
 <technology name=""/>
 </technologies>
@@ -683,6 +823,47 @@
 <connect gate="G$1" pin="P$7" pad="P$7"/>
 <connect gate="G$1" pin="P$8" pad="P$8"/>
 <connect gate="G$1" pin="P$9" pad="P$9"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="ADC141S626" prefix="IC">
+<gates>
+<gate name="G$1" symbol="ADC141S626" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="10-VSSOP">
+<connects>
+<connect gate="G$1" pin="+IN" pad="P$2"/>
+<connect gate="G$1" pin="-IN" pad="P$3"/>
+<connect gate="G$1" pin="CS" pad="P$6"/>
+<connect gate="G$1" pin="DOUT" pad="P$7"/>
+<connect gate="G$1" pin="GND" pad="P$4"/>
+<connect gate="G$1" pin="GND2" pad="P$5"/>
+<connect gate="G$1" pin="SCLK" pad="P$8"/>
+<connect gate="G$1" pin="VA" pad="P$10"/>
+<connect gate="G$1" pin="VIO" pad="P$9"/>
+<connect gate="G$1" pin="VREF" pad="P$1"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="REF3040" prefix="V" uservalue="yes">
+<gates>
+<gate name="G$1" symbol="VREF" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="SOT-23">
+<connects>
+<connect gate="G$1" pin="GND" pad="3"/>
+<connect gate="G$1" pin="VIN" pad="1"/>
+<connect gate="G$1" pin="VOUT" pad="2"/>
 </connects>
 <technologies>
 <technology name=""/>
